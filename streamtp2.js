@@ -24,8 +24,8 @@ var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
     
    doCORSRequest({
         method: this.id === 'post' ? 'POST' : 'GET',
-        url: urlField.value,
-        data: dataField.value
+        url: urlField,
+        data: dataField
       }, function printResult(result) {
         outputField = result;
         console.log(result);
