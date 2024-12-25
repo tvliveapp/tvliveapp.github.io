@@ -27,7 +27,8 @@ var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
         url: urlField.value,
         data: dataField.value
       }, function printResult(result) {
-        outputField.value = result;
+        outputField = result;
+        console.log(result);
       });
     
   })();
