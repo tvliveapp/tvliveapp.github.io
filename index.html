@@ -1,11 +1,349 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e2f;
+            color: #ffffff;
+        }
+        .container {
+            width: 90%; 
+            max-width: 1300px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #2b2b3c;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffffff;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        li {
+            width: 48%;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            background-color: #3a3a4a;
+        }
+        .channel-info {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 10px;
+            position: relative;
+        }
+        .channel-info h2 {
+            margin: 0;
+            font-size: 20px;
+            text-align: center;
+        }
+        .channel-status {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .status-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-active {
+            background-color: #00ff00; 
+        }
+        .status-inactive {
+            background-color: #ff0000; 
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .channel-details {
+            padding: 10px;
+            text-align: center;
+        }
+        .channel-details p {
+            margin: 5px 0;
+            color: #dddddd;
+        }
+        .channel-buttons {
+            text-align: center;
+        }
+        .channel-buttons a {
+            display: inline-block;
+            padding: 8px 20px;
+            margin-right: 10px;
+            background-color: #ff3201;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .channel-buttons a:hover {
+            background-color: #0056b3;
+        }
+        .update-text {
+            color: #20fcb3;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .update-text4 {
+            color: #FFFFFF;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .event-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .event-name {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .iframe-container {
+            width: 70%;
+            background-color: #3a3a4a;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .iframe-link {
+            width: 90%;
+            padding: 10px;
+            background-color: #2b2b3c;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+        }
+        .start-stream-box {
+            text-align: center;
+            padding: 20px;
+            background-color: #040d2e;
+            color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgb(255 255 255 / 30%);
+            margin-bottom: 30px;
+        }
+        .start-stream-box h2 {
+            font-size: 24px;
+            margin: 0 0 10px;
+        }
+        .start-stream-box a {
+            display: inline-block;
+            padding: 10px 20px;
+            color: #ffffff;
+            background-color: #0024fc; 
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .start-stream-box a:hover {
+            background-color: #ff3201;
+        }
+    </style>
+</head>
 <body>
+  <script src="streamtp2.js">
+    <div class="container">
+        <h1>Canales 24/7 (HD) | 24/7 Channels (HD)</h1>
+   <p class="update-text">| global1.php (Reproducción Manual) | global2.php (Reproducción Automática)</p> 
+        <ul id="channel-list">
+        </ul>
+    </div>
+    <p class="update-text4">...</p>
 
-<h1>The script src attribute</h1>
+<script>
+async function fetchStatus() {
+    try {
+        const uniqueId = crypto.randomUUID(); 
+        const response = await fetch('https://streamtp2.com/status.json?id=${uniqueId}');
+        const statusData = await response.json();
 
-<script src="streamtp2.js">
+
+        const channels = {
+            'ESPN 1': 'https://streamtp2.com/global1.php?stream=espn1',
+            'ESPN 2': 'https://streamtp2.com/global1.php?stream=espn2',
+            'ESPN 3': 'https://streamtp2.com/global1.php?stream=espn3',
+            'ESPN 4': 'https://streamtp2.com/global1.php?stream=espn4',
+            'ESPN 5': 'https://streamtp2.com/global1.php?stream=espn5',
+            'ESPN 6': 'https://streamtp2.com/global1.php?stream=espn6',
+            'ESPN 7': 'https://streamtp2.com/global1.php?stream=espn7',
+            'Win Sports +': 'https://streamtp2.com/global1.php?stream=winplus',
+            'Win Sports + (Op2)': 'https://streamtp2.com/global1.php?stream=winplus2',
+           'Win Sports': 'https://streamtp2.com/global1.php?stream=winsports',
+            'Win Play +': 'https://streamtp2.com/global1.php?stream=winplusonline1',
+            'Fox Sports 1 (Argentina)': 'https://streamtp2.com/global1.php?stream=fox1ar',
+            'Fox Sports 2 (Argentina)': 'https://streamtp2.com/global1.php?stream=fox2ar',
+            'Fox Sports 3 (Argentina)': 'https://streamtp2.com/global1.php?stream=fox3ar',
+            'Dsports': 'https://streamtp2.com/global1.php?stream=dsports',
+            'Dsports 2': 'https://streamtp2.com/global1.php?stream=dsports_2',
+            'Dsports +': 'https://streamtp2.com/global1.php?stream=dsports_plus',
+            'TNT Sports Chile': 'https://streamtp2.com/global1.php?stream=tnt_chile',
+            'TNT Sports Argentina': 'https://streamtp2.com/global1.php?stream=tntsports_argentina',
+            'ESPN Premium Argentina': 'https://streamtp2.com/global1.php?stream=espn_premium',
+            'TyC Sports': 'https://streamtp2.com/global1.php?stream=tyc_sports',
+            'Telefe': 'https://streamtp2.com/global1.php?stream=telefe',
+            'TV Pública': 'https://streamtp2.com/global1.php?stream=tv_publica',
+            'Liga 1 MAX': 'https://streamtp2.com/global1.php?stream=l1max',
+            'GolTV': 'https://streamtp2.com/global1.php?stream=goltv',
+            'VTV +': 'https://streamtp2.com/global1.php?stream=vtvplus',
+            'GolPeru': 'https://streamtp2.com/global1.php?stream=golperu',
+            'ESPN Deportes USA': 'https://streamtp2.com/global1.php?stream=espn_deportes',
+            'TUDN USA': 'https://streamtp2.com/global1.php?stream=tudn_usa',
+            'Fox Sports 1 USA': 'https://streamtp2.com/global1.php?stream=fox_1_usa',
+            'Fox Sports 2 USA': 'https://streamtp2.com/global1.php?stream=fox_2_usa',
+            'Universo USA': 'https://streamtp2.com/global1.php?stream=universo_usa',
+            'Univisíon USA': 'https://streamtp2.com/global1.php?stream=univision_usa',
+            'Universo USA': 'https://streamtp2.com/global1.php?stream=universo_usa',
+            'Fox Deportes USA': 'https://streamtp2.com/global1.php?stream=fox_deportes_usa',
+            'Azteca Deportes MX': 'https://streamtp2.com/global1.php?stream=azteca_deportes',
+            'Fox Sports 1 MX': 'https://streamtp2.com/global1.php?stream=foxsportsmx',
+            'Fox Sports 2 MX': 'https://streamtp2.com/global1.php?stream=foxsports2mx',
+            'Fox Sports 3 MX': 'https://streamtp2.com/global1.php?stream=foxsports3mx',
+            'Fox Sports Premium': 'https://streamtp2.com/global1.php?stream=foxsportspremium',
+            'ESPN MX': 'https://streamtp2.com/global1.php?stream=espnmx',
+            'ESPN 2 MX': 'https://streamtp2.com/global1.php?stream=espn2mx',
+            'ESPN 3 MX': 'https://streamtp2.com/global1.php?stream=espn3mx',
+            'TVC Deportes MX': 'https://streamtp2.com/global1.php?stream=tvc_deportes',
+            'HI! Sports MX': 'https://streamtp2.com/global1.php?stream=hisports',
+            'DAZN 1 ES': 'https://streamtp2.com/global1.php?stream=dazn1',
+            'DAZN 2 ES': 'https://streamtp2.com/global1.php?stream=dazn2',
+            'DAZN 3 ES (Solo eventos)': 'https://streamtp2.com/global1.php?stream=dazn3',
+            'DAZN 4 ES (Solo eventos)': 'https://streamtp2.com/global1.php?stream=dazn4',
+            'DAZN LaLiga': 'https://streamtp2.com/global1.php?stream=dazn_laliga',
+            'Movistar+ LaLiga': 'https://streamtp2.com/global1.php?stream=movistarlaliga',
+            'Movistar Liga de Campeones': 'https://streamtp2.com/global1.php?stream=movistarligadecampeones',
+            'Movistar Liga de Campeones 2': 'https://streamtp2.com/global1.php?stream=movistarligadecampeones2',
+            'Movistar Liga de Campeones 3': 'https://streamtp2.com/global1.php?stream=movistarligadecampeones3',
+            'Caracol TV': 'https://streamtp2.com/global1.php?stream=caracoltv',
+            'RCN CO': 'https://streamtp2.com/global1.php?stream=rcnco',
+            'TNT 1 GB': 'https://streamtp2.com/global1.php?stream=tnt_1_gb',
+            'TNT 2 GB': 'https://streamtp2.com/global1.php?stream=tnt_2_gb',
+            'TNT 3 GB': 'https://streamtp2.com/global1.php?stream=tnt_3_gb',
+            'TNT 4 GB': 'https://streamtp2.com/global1.php?stream=tnt_4_gb',
+            'Sky Sports Bundesliga 1': 'https://streamtp2.com/global1.php?stream=sky_bundesliga1',
+            'Sky Sports Bundesliga 2': 'https://streamtp2.com/global1.php?stream=sky_bundesliga2',
+            'Sky Sports Bundesliga 3': 'https://streamtp2.com/global1.php?stream=sky_bundesliga3',
+            'Sky Sports Bundesliga 4': 'https://streamtp2.com/global1.php?stream=sky_bundesliga4',
+            'Sky Sports Bundesliga 5': 'https://streamtp2.com/global1.php?stream=sky_bundesliga5',
+            'DAZN 1 DE': 'https://streamtp2.com/global1.php?stream=dazn1de',
+            'DAZN 2 DE': 'https://streamtp2.com/global1.php?stream=dazn2de',
+            'Eleven Sports 1 PT': 'https://streamtp2.com/global1.php?stream=eleven_sports_1_pt',
+            'Eleven Sports 2 PT': 'https://streamtp2.com/global1.php?stream=eleven_sports_2_pt',
+            'Eleven Sports 3 PT': 'https://streamtp2.com/global1.php?stream=eleven_sports_3_pt',
+            'Eleven Sports 4 PT': 'https://streamtp2.com/global1.php?stream=eleven_sports_4_pt',
+            'Eleven Sports 5 PT': 'https://streamtp2.com/global1.php?stream=eleven_sports_5_pt',
+            'Canal 11 PT': 'https://streamtp2.com/global1.php?stream=canal11_portugal',
+            'Sport TV 1 PT': 'https://streamtp2.com/global1.php?stream=sportv_1pt',
+            'Sport TV 2 PT': 'https://streamtp2.com/global1.php?stream=sportv_2pt',
+            'Sport TV 3 PT': 'https://streamtp2.com/global1.php?stream=sportv_3pt',
+            'Sport TV 4 PT': 'https://streamtp2.com/global1.php?stream=sportv_4pt',
+            'Sport TV 5 PT': 'https://streamtp2.com/global1.php?stream=sportv_5pt',
+            'Sport TV 6 PT': 'https://streamtp2.com/global1.php?stream=sportv_6pt',
+            'Sport TV 1 BR': 'https://streamtp2.com/global1.php?stream=sporttvbr1',
+            'Sport TV 2 BR': 'https://streamtp2.com/global1.php?stream=sporttvbr2',
+            'Sport TV 3 BR': 'https://streamtp2.com/global1.php?stream=sporttvbr3',
+            'Premiere 1 BR': 'https://streamtp2.com/global1.php?stream=premiere1',
+            'Premiere 2 BR': 'https://streamtp2.com/global1.php?stream=premiere2',
+            'Premiere 3 BR': 'https://streamtp2.com/global1.php?stream=premiere3',
+           'Premier Sports 1 Irlanda': 'https://streamtp2.com/global1.php?stream=premiersports1_irl',
+            'Premier Sports 2 Irlanda': 'https://streamtp2.com/global1.php?stream=premiersports2_irl',
+
+        };
+
+        const channelList = document.getElementById('channel-list');
+        channelList.innerHTML = '';
+
+          const specialChannel = {
+            title: 'Eventos',
+            url: 'https://streamtp2.com/eventos.html',
+            status: 'Activo'
+        };
+        
+
+        const specialListItem = document.createElement('li');
+        specialListItem.innerHTML = `
+            <div class="channel-info">
+                <h2>${specialChannel.title}</h2>
+                <div class="channel-status">
+                    <span class="status-circle status-active"></span>
+                    Activo
+                </div>
+            </div>
+            <div class="channel-details"></div>
+            <div class="channel-buttons">
+                <a href="${specialChannel.url}" target="_blank">Link</a>
+            </div>
+        `;
+        channelList.appendChild(specialListItem);
+
+        Object.keys(channels).forEach(channelTitle => {
+            const channelUrl = channels[channelTitle];
+            let channelId;
+
+            try {
+                const url = new URL(channelUrl);
+                channelId = url.searchParams.get('stream');
+            } catch (error) {
+                return;
+            }
+
+            if (!channelId) {
+                return;
+            }
+            
+            
+
+            const channelStatus = statusData.find(item => item.Canal.toLowerCase() === channelId.toLowerCase());
+            const statusClass = channelStatus && channelStatus.Estado === 'Activo' ? 'status-active' : 'status-inactive';
+            const statusText = channelStatus && channelStatus.Estado === 'Activo' ? 'Activo' : 'Inactivo';
+
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <div class="channel-info">
+                    <h2>${channelTitle}</h2>
+                    <div class="channel-status">
+                        <span class="status-circle ${statusClass}"></span>
+                        ${statusText}
+                    </div>
+                </div>
+                <div class="channel-details"></div>
+                <div class="channel-buttons">
+                    <a href="${channelUrl}" target="_blank">Link</a>
+                </div>
+            `;
+
+            channelList.appendChild(listItem);
+        });
+    } catch (error) {
+    }
+}
+
+fetchStatus(); 
+setInterval(fetchStatus, 5000); 
+//visual code - 200!
 </script>
-
-</body>
-</html>
