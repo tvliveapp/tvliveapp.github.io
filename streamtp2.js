@@ -1,4 +1,8 @@
- var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
+var urlField = "https://streamtp2.com/";
+var dataField = "";
+var outputField = "";
+
+var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
   function doCORSRequest(options, printResult) {
     var x = new XMLHttpRequest();
     x.open(options.method, cors_api_url + options.url);
@@ -17,9 +21,7 @@
 
   // Bind event
   (function() {
-    var urlField = "https://streamtp2.com/";
-    var dataField = "";
-    var outputField = "";
+    
    doCORSRequest({
         method: this.id === 'post' ? 'POST' : 'GET',
         url: urlField.value,
