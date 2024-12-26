@@ -29,6 +29,10 @@
         p2pConfig.hlsjsInstance = player.core.getCurrentPlayback()?._hls;
         var engine = new P2PEngineHls(p2pConfig);
     });
+
+  function play(streamUrl){
+      player.load(streamUrl);
+  }  
 </script>
 
 </body>
