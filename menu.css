@@ -31,7 +31,7 @@ body {
 
 .sidenav a.active {
   background-color: #04AA6D;
-  color: white;
+  color: blue;
 }
 
 .sidenav .closebtn {
