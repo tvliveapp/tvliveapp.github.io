@@ -10,13 +10,14 @@
 <body>
 <div id="player"></div>
 <script>
+    var player="";
     var playbackURL = "https://vals88.pricesaskeloadsc.com:443/global/starplus15/index.m3u8?token=f8bd91faf6c80216933fb528328866352dc1c6fe-b6-1735280684-1735244684";
     var p2pConfig = {
         live: true,
         trackerZone: 'us',    
     }
     P2PEngineHls.tryRegisterServiceWorker(p2pConfig).then(() => {
-        var player = new Clappr.Player({
+        player = new Clappr.Player({
             source: playbackURL,
             parentId: "#player",
             poster: '',
