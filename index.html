@@ -10,6 +10,49 @@
 </head>
 <body>
 <div id="player"></div>
+<div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"> &times;</a>
+  <a "arrow-togglable" href="#">TV 1</a>
+  <a "arrow-togglable" href="#">TV 2</a>
+  <a "arrow-togglable" href="#">TV 3</a>
+  <a "arrow-togglable" href="#">Events 1</a>
+</div>
+
+<h2 id="txt">Animated Sidenav Example</h2>
+<p>Click on the element below to open the side navigation menu.</p>
+<span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
+
+<script>
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+}
+
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+}
+var elements = document.getElementsByClassName("arrow-togglable");
+    var currentIndex = 0;
+	console.log(elements)
+    document.onkeydown = function(e) {
+      			document.getElementById("txt").innerHTML=e.key+" "+currentIndex;
+      switch (e.keyCode) {
+        case 38:
+          currentIndex = (currentIndex == 0) ? elements.length - 1 : --currentIndex;
+          elements[currentIndex].focus();
+          break;
+        case 40:
+          currentIndex = ((currentIndex + 1) == elements.length) ? 0 : ++currentIndex;
+          elements[currentIndex].focus();
+          break;
+      }
+    };
+</script>  
+
+
+    
+
+
+    
 <script>
     var player="";
     var playbackURL = "https://vals88.pricesaskeloadsc.com:443/global/starplus15/index.m3u8?token=f8bd91faf6c80216933fb528328866352dc1c6fe-b6-1735280684-1735244684";
