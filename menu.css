@@ -29,7 +29,7 @@ body {
 }
 
 
-.sidenav a"focus {
+.sidenav a:focus {
   background-color: green;
   color: red;
   
