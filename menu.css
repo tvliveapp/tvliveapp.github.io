@@ -29,9 +29,10 @@ body {
 }
 
 
-.sidenav a.active {
-  background-color: #04AA6D;
-  color: blue;
+.sidenav a"focus {
+  background-color: green;
+  color: red;
+  
 }
 
 .sidenav .closebtn {
