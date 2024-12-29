@@ -9,13 +9,12 @@ function openNav() {
 }
 
 function closeNav() {
-  document.getElementById("mySidenav").style.width = "0";
+  document.getElementByClassname("mySidenav").style.width = "0";
 }
     
 
 function menu(){
- console.log(menuIndex);
-  
+ console.log(menuIndex); 
   
 }
 document.onkeydown = function(e) {
@@ -23,12 +22,16 @@ document.onkeydown = function(e) {
       document.getElementById("txt").innerHTML=e.key+" "+currentIndex;
       switch (e.keyCode) {
         case 39:
+          closeNav(menuIndex);
           menuIndex = (menuIndex == 3) ? 3 : ++menuIndex;
+          openNav(menuIndex);
           menu();
           elements[currentIndex].focus();
           break;
-        case 3-:
+        case 37:
+          closeNav(menuIndex);
           menuIndex = (menuIndex == 0) ? 0 : --menuIndex;
+          openNav(menuIndex);
           menu();
           elements[currentIndex].focus();
           break;
