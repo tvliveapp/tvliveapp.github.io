@@ -2,7 +2,7 @@ var elements = document.getElementsByClassName("arrow-togglable");
 var currentIndex = 0;
 console.log(elements)
 var menuIndex = 0;
-var 
+
 
 function openNav() {
   document.getElementById("mySidenav").style.width = "250px";
