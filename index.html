@@ -22,31 +22,6 @@
 <p>Click on the element below to open the side navigation menu.</p>
 <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; open</span>
 
-<script>
-function openNav() {
-  document.getElementById("mySidenav").style.width = "250px";
-}
-
-function closeNav() {
-  document.getElementById("mySidenav").style.width = "0";
-}
-var elements = document.getElementsByClassName("arrow-togglable");
-    var currentIndex = 0;
-	console.log(elements)
-    document.onkeydown = function(e) {
-      			document.getElementById("txt").innerHTML=e.key+" "+currentIndex;
-      switch (e.keyCode) {
-        case 38:
-          currentIndex = (currentIndex == 0) ? elements.length - 1 : --currentIndex;
-          elements[currentIndex].focus();
-          break;
-        case 40:
-          currentIndex = ((currentIndex + 1) == elements.length) ? 0 : ++currentIndex;
-          elements[currentIndex].focus();
-          break;
-      }
-    };
-</script>  
 
 
     
