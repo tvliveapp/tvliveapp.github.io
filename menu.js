@@ -3,13 +3,9 @@ var currentIndex = 0;
 console.log(elements)
 var menuIndex = 0;
 var menuList=[];
-var activeNAv="mySidenav1";
+var activeNav=0;
 function openNav(idx) {
-  var slideName="mySidenav"+idx;
-  if (idx.search("mySidenav")>-1)
-    document.getElementById(idx).style.width = "250px";
-  else
-    document.getElementById("mySidenav1").style.width = "250px";  
+  document.getElementById(idx).style.width = "250px";  
 }
 
 function closeNav(idx) {
@@ -20,7 +16,7 @@ function closeNav(idx) {
     
 
 function menu(){
- console.log(menuIndex); 
+console.log(activeNav);
   
 }
 document.onkeydown = function(e) {
@@ -28,19 +24,32 @@ document.onkeydown = function(e) {
       document.getElementById("txt").innerHTML=e.key+" "+currentIndex;
       switch (e.keyCode) {
         case 37:
-          closeNav(document.activeElement.parentElement.id);
-          openNav(document.activeElement.parentElement.id+"C");
+          
           elements[currentIndex].focus();
           break;
         case 39:
-          /*
+         
+          menu();
+          elements[currentIndex].focus();
+         /*
           closeNav(menuIndex);
           menuIndex = (menuIndex == 0) ? 0 : --menuIndex;
           openNav(menuIndex);
           menu();
-          */
-          closeNav(document.activeElement.parentElement.id);
-          openNav(document.activeElement.parentElement.id.replace("C",""));
+          
+          if(activeNav=="")
+            activeNav="mySidenav1"
+          if(activeNav=="mySidenav1") 
+            activeElement=document.activeElement;
+            if (activeElement.search("mySidenav")>-1){
+              closeNav(activeNav);
+              activeNav=="mySidenav1"
+            }
+           else{
+             
+             activeNav=activeNav+"C"
+             openNav(activeNav);
+           }*/
           elements[currentIndex].focus();
           break;
         case 38:
