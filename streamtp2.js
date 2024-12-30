@@ -142,7 +142,7 @@ m.className="sidenav"
 // <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"> ×</a>
 a=document.createElement("a"); 
 a.href="javascript:void(0)";
-a.classname="closebtn";
+a.className="closebtn";
 a.onclick=a.onclick=function(){closeNav(1)};
 a.innerHTML="&times;"
 m.appendChild(a);
@@ -152,7 +152,7 @@ for (let key in channels) {
         console.log(key, value);
         a=document.createElement("a"); 
         a.href="#";
-        a.classname="arrow-togglable";
+        a.className="arrow-togglable";
        // a.onclick=a.onclick=function(){closeNav(1)};
         a.innerHTML=key;
         m.appendChild(a);
