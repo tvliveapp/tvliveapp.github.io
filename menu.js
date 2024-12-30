@@ -62,15 +62,24 @@ document.onkeydown = function(e) {
              activeNav=activeNav+"C"
              openNav(activeNav);
            }*/
+          
           document.getElementById(activeNav).children[ document.getElementById(activeNav).activeIndex].focus();
           break;
         case 38:
-          currentIndex = (currentIndex == 0) ? elements.length - 1 : --currentIndex;
+          if(document.getElementById(activeNav).activeIndex>1)
+            document.getElementById(activeNav).activeIndex=document.getElementById(activeNav).activeIndex-1;
+          document.getElementById(activeNav).children[ document.getElementById(activeNav).activeIndex].focus();
+          /*currentIndex = (currentIndex == 0) ? elements.length - 1 : --currentIndex;
           elements[currentIndex].focus();
+          */
           break;
         case 40:
+          if(document.getElementById(activeNav).activeIndex<document.getElementById(activeNav).childElementCount)
+            document.getElementById(activeNav).activeIndex=document.getElementById(activeNav).activeIndex+1;
+          document.getElementById(activeNav).children[ document.getElementById(activeNav).activeIndex].focus();
+          /*
           currentIndex = ((currentIndex + 1) == elements.length) ? 0 : ++currentIndex;
-          elements[currentIndex].focus();
+          elements[currentIndex].focus();*/
           break;
       }
     };
