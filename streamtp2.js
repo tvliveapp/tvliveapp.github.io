@@ -147,4 +147,4 @@ a.innerHTML="&times;"
 
 
     
-    document.getElementById("player").after(m)
+//    document.getElementById("player").after(m)
