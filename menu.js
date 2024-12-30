@@ -60,7 +60,7 @@ document.onkeydown = function(e) {
              activeNav=activeNav+"C"
              openNav(activeNav);
            }*/
-          elements[currentIndex].focus();
+          document.getElementById(activeNav).elements[ document.getElementById(activeNav).activeIndex].focus();
           break;
         case 38:
           currentIndex = (currentIndex == 0) ? elements.length - 1 : --currentIndex;
