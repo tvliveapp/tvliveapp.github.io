@@ -4,12 +4,14 @@ console.log(elements)
 var menuIndex = 0;
 
 
-function openNav() {
-  document.getElementById("mySidenav").style.width = "250px";
+function openNav(idx) {
+  var slideName="mySidenav"+idx;
+  document.getElementById(slideName).style.width = "250px";
 }
 
-function closeNav() {
-  document.getElementByClassname("mySidenav").style.width = "0";
+function closeNav(idx) {
+  var slideName="mySidenav"+idx;
+  document.getElementById(slideName).style.width = "0";
 }
     
 
