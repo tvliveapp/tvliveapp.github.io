@@ -6,7 +6,7 @@ var menuList=[];
 var activeNAv="mySidenav1";
 function openNav(idx) {
   var slideName="mySidenav"+idx;
-  if (idx && idx<3)
+  if (idx )
     document.getElementById(idx).style.width = "250px";
 }
 
