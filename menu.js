@@ -6,12 +6,14 @@ var menuIndex = 0;
 
 function openNav(idx) {
   var slideName="mySidenav"+idx;
-  document.getElementById(slideName).style.width = "250px";
+  if (idx)
+    document.getElementById(slideName).style.width = "250px";
 }
 
 function closeNav(idx) {
   var slideName="mySidenav"+idx;
-  document.getElementById(slideName).style.width = "0";
+  if (idx)
+    document.getElementById(slideName).style.width = "0";
 }
     
 
