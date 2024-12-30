@@ -1,3 +1,4 @@
+document.getElementById("mySidenav1").activeIndex=1;
 var elements = document.getElementsByClassName("arrow-togglable");
 var currentIndex = 0;
 console.log(elements)
@@ -5,6 +6,7 @@ var menuIndex = 0;
 var menuList=[];
 var activeNav="";
 var activeSt=0;
+
 
 function openNav(idx) {
   document.getElementById(idx).style.width = "250px";  
