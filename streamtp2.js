@@ -127,7 +127,7 @@ var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
     console.log('cors_api_url = "http://localhost:8080/"');
   }
 
-let mySidenav1=document.getElementById("mySidenav1");
+var mySidenav1=document.getElementById("mySidenav1");
 a=document.createElement("a"); 
 a.className= "arrow-togglable";
 a.innerHTML="streamtp2 TV";
@@ -139,7 +139,7 @@ for (let key in channels) {
         value = channels[key];
         console.log(key, value);
     }
-
+}
 /*
 m=document.createElement("div");
 m.id="mySidenav3"
