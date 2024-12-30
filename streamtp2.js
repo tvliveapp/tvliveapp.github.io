@@ -154,7 +154,7 @@ for (let key in channels) {
         a.href="#";
         a.classname="arrow-togglable";
        // a.onclick=a.onclick=function(){closeNav(1)};
-        a.innerHTML="&times;"
+        a.innerHTML=key;
         m.appendChild(a);
     }
 }
