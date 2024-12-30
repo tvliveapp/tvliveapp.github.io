@@ -135,23 +135,28 @@ a.href="#";
 a.name="streamtp2";
 mySidenav1.appendChild(a);
 
-for (let key in channels) {
-    if (channels.hasOwnProperty(key)) {
-        value = channels[key];
-        console.log(key, value);
-    }
-}
-/*
+
 m=document.createElement("div");
-m.id="mySidenav3"
+m.id="streamtp2"
 m.className="sidenav"
 // <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"> ×</a>
 a=document.createElement("a"); 
 a.href="javascript:void(0)";
-a.class="closebtn";
+a.classname="closebtn";
 a.onclick=a.onclick=function(){closeNav(1)};
 a.innerHTML="&times;"
-
-*/
+m.appendChild(a);
+for (let key in channels) {
+    if (channels.hasOwnProperty(key)) {
+        value = channels[key];
+        console.log(key, value);
+        a=document.createElement("a"); 
+        a.href="#";
+        a.classname="arrow-togglable";
+       // a.onclick=a.onclick=function(){closeNav(1)};
+        a.innerHTML="&times;"
+        m.appendChild(a);
+    }
+}
     
-//    document.getElementById("player").after(m)
+   document.getElementById("player").after(m)
