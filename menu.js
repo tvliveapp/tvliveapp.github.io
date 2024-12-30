@@ -12,7 +12,7 @@ function openNav(idx) {
 
 function closeNav(idx) {
   var slideName="mySidenav"+idx;
-  if (idx)
+  if (idx && idx<3)
     document.getElementById(slideName).style.width = "0";
 }
     
