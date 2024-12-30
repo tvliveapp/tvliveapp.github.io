@@ -2,7 +2,7 @@ var elements = document.getElementsByClassName("arrow-togglable");
 var currentIndex = 0;
 console.log(elements)
 var menuIndex = 0;
-
+var menuList=[];
 
 function openNav(idx) {
   var slideName="mySidenav"+idx;
