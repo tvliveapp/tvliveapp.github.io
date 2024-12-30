@@ -132,7 +132,7 @@ a=document.createElement("a");
 a.className= "arrow-togglable";
 a.innerHTML="streamtp2 TV";
 a.href="#";
-a.name="streamtp2"'
+a.name="streamtp2";
 mySidenav1.appendChild(a);
 
 for (let key in channels) {
