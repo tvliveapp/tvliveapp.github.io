@@ -1,6 +1,6 @@
 
     var player="";
-    var playbackURL = "https://vasoc88.pricesaskeloadsc.com:443/global/eventos7/index.m3u8?token=811209c227c99f0c5b268d2b7b393e2e2072cb66-7c-1735553997-1735517997";
+    var playbackURL = "https://cale.pricesaskeloadsc.com/eventos7/tracks-v1a1/mono.m3u8?token=811209c227c99f0c5b268d2b7b393e2e2072cb66-7c-1735553997-1735517997";
     var p2pConfig = {
         live: true,
         trackerZone: 'us',    
