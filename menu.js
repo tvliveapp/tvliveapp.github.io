@@ -3,7 +3,9 @@ var currentIndex = 0;
 console.log(elements)
 var menuIndex = 0;
 var menuList=[];
-var activeNav=0;
+var activeNav="";
+var activeSt=0;
+
 function openNav(idx) {
   document.getElementById(idx).style.width = "250px";  
 }
@@ -28,8 +30,14 @@ document.onkeydown = function(e) {
           elements[currentIndex].focus();
           break;
         case 39:
-         
-          menu();
+         if(activeNav=="mySidenav1"){
+           closeNav(activeNav);
+           openNav(document.activeElement.chName)
+         } else if(activeNav==""){
+            openNav("mySidenav1");
+         } else
+             openNav(activeNav);
+          
           elements[currentIndex].focus();
          /*
           closeNav(menuIndex);
