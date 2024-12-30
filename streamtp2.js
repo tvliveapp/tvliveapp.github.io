@@ -2,6 +2,7 @@ var urlField = "https://streamtp2.com/";
 var dataField = "";
 var outputField = "";
 
+
 channels={
     "ESPN 1": "https://streamtp2.com/global1.php?stream=espn1",
     "ESPN 2": "https://streamtp2.com/global1.php?stream=espn2",
@@ -126,7 +127,12 @@ var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
     console.log('cors_api_url = "http://localhost:8080/"');
   }
 
-
+let mySidenav1=document.getElementById("mySidenav1");
+a=document.createElement("a"); 
+a.className= "arrow-togglable";
+a.innerHTML="streamtp2 TV";
+a.href="#";
+mySidenav1.append(a);
 
 for (let key in channels) {
     if (channels.hasOwnProperty(key)) {
