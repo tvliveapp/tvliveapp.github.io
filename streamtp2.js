@@ -140,7 +140,7 @@ for (let key in channels) {
         console.log(key, value);
     }
 
-
+/*
 m=document.createElement("div");
 m.id="mySidenav3"
 m.className="sidenav"
@@ -151,6 +151,6 @@ a.class="closebtn";
 a.onclick=a.onclick=function(){closeNav(1)};
 a.innerHTML="&times;"
 
-
+*/
     
 //    document.getElementById("player").after(m)
