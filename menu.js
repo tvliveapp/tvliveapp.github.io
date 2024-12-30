@@ -27,12 +27,12 @@ document.onkeydown = function(e) {
       console.log(e.keyCode,e.key) 
       document.getElementById("txt").innerHTML=e.key+" "+currentIndex;
       switch (e.keyCode) {
-        case 39:
+        case 37:
           closeNav(document.activeElement.parentElement.id);
           openNav(document.activeElement.parentElement.id+"C");
           elements[currentIndex].focus();
           break;
-        case 37:
+        case 39:
           /*
           closeNav(menuIndex);
           menuIndex = (menuIndex == 0) ? 0 : --menuIndex;
