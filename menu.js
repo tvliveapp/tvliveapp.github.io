@@ -74,7 +74,7 @@ document.onkeydown = function(e) {
           */
           break;
         case 40:
-          if(document.getElementById(activeNav).activeIndex<document.getElementById(activeNav).childElementCount)
+          if(document.getElementById(activeNav).activeIndex<document.getElementById(activeNav).childElementCount-1)
             document.getElementById(activeNav).activeIndex=document.getElementById(activeNav).activeIndex+1;
           document.getElementById(activeNav).children[ document.getElementById(activeNav).activeIndex].focus();
           /*
