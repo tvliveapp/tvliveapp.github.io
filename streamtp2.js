@@ -138,7 +138,7 @@ mySidenav1.appendChild(a);
 
 m=document.createElement("div");
 m.id="streamtp2"
-m.activeIndex=0;
+m.activeIndex=1;
 m.className="sidenav"
 // <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"> ×</a>
 a=document.createElement("a"); 
