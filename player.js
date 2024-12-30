@@ -1,6 +1,6 @@
 //document.location="https://shawon9324.github.io/apps/keytester/"
     var player="";
-    var playbackURL = "https://cad99.pricesaskeloadsc.com/nba05/tracks-v1a1/mono.m3u8?token=3608b1764f462f72ab808ecabeb6cf1ea16a0989-18-1735558289-1735522289";
+    var playbackURL = "https://24a.pricesaskeloadsc.com:443/global/nba06/index.m3u8?token=8d539af8f48c0a9839a52861065f1ad8166efd81-ee-1735558498-1735522498";
     var p2pConfig = {
         live: true,
         trackerZone: 'us',    
