@@ -6,13 +6,15 @@ var menuList=[];
 var activeNAv="mySidenav1";
 function openNav(idx) {
   var slideName="mySidenav"+idx;
-  if (idx )
+  if (idx.search("mySidenav")>-1)
     document.getElementById(idx).style.width = "250px";
+  else
+    document.getElementById("mySidenav1").style.width = "250px";  
 }
 
 function closeNav(idx) {
   
-  if (idx)
+  if (idx.search("mySidenav")>-1)
     document.getElementById(idx).style.width = "0";
 }
     
