@@ -125,3 +125,26 @@ var cors_api_url = 'https://cors-anywhere.herokuapp.com/';
     console.log('// To test a local CORS Anywhere server, set cors_api_url. For example:');
     console.log('cors_api_url = "http://localhost:8080/"');
   }
+
+
+
+for (let key in channels) {
+    if (channels.hasOwnProperty(key)) {
+        value = channels[key];
+        console.log(key, value);
+    }
+
+
+m=document.createElement("div");
+m.id="mySidenav3"
+m.className="sidenav"
+// <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"> ×</a>
+a=document.createElement("a"); 
+a.href="javascript:void(0)";
+a.class="closebtn";
+a.onclick=a.onclick=function(){closeNav(1)};
+a.innerHTML="&times;"
+
+
+    
+    document.getElementById("player").after(m)
