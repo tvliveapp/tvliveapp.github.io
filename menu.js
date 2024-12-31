@@ -35,6 +35,7 @@ document.onkeydown = function(e) {
             
          } else
              closeNav(activeNav);
+              activeNav= "mySidenav1";
              openNav("mySidenav1");
           document.getElementById(activeNav).children[ document.getElementById(activeNav).activeIndex].focus();
           break;
