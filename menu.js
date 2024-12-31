@@ -48,11 +48,13 @@ document.onkeydown = function(e) {
          } else if(activeNav==""){
             activeNav="mySidenav1"
             openNav("mySidenav1");
-         } else
-             openNav(activeNav);
-          
-          elements[currentIndex].focus();
-         /*
+         } else{
+             if(document.activeElement.id==activeNav)
+               closeNav(activeNav);
+              else
+                openNav(activeNav);
+         }
+                   /*
           closeNav(menuIndex);
           menuIndex = (menuIndex == 0) ? 0 : --menuIndex;
           openNav(menuIndex);
