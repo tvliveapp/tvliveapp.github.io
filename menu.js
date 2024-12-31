@@ -33,10 +33,11 @@ document.onkeydown = function(e) {
           activeNav= "";
          } else if(activeNav==""){
             
-         } else
+         } else{
              closeNav(activeNav);
               activeNav= "mySidenav1";
              openNav("mySidenav1");
+          }
           document.getElementById(activeNav).children[ document.getElementById(activeNav).activeIndex].focus();
           break;
         case 39:
