@@ -28,8 +28,14 @@ document.onkeydown = function(e) {
       document.getElementById("txt").innerHTML=e.key+" "+currentIndex;
       switch (e.keyCode) {
         case 37:
+          if(activeNav=="mySidenav1"){
+           closeNav(activeNav);
+          activeNav= "";
+         } else if(activeNav==""){
+            
+         } else
+             close(activeNav);
           
-          elements[currentIndex].focus();
           break;
         case 39:
          if(activeNav=="mySidenav1"){
