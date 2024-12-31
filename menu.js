@@ -49,7 +49,7 @@ document.onkeydown = function(e) {
             activeNav="mySidenav1"
             openNav("mySidenav1");
          } else{
-             if(document.activeElement.id==activeNav)
+             if(document.activeElement.parentElement.id==activeNav)
                closeNav(activeNav);
               else
                 openNav(activeNav);
