@@ -34,9 +34,7 @@ document.onkeydown = function(e) {
         case 37:
           if(activeNav=="mySidenav1"){
            closeNav(activeNav);
-          activeNav= "";
-         } else if(activeNav==""){
-            
+           activeNav=""; 
          } else{
              closeNav(activeNav);
               activeNav= "mySidenav1";
