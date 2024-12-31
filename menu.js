@@ -52,11 +52,11 @@ document.onkeydown = function(e) {
                closeNav(activeNav);
                activeNav= document.activeElement.name;
                openNav(activeNav);
-         } else if(document.activeElement.parentElement.id==activeNav){
-               closeNav(activeNav);
-               mySidenav1.focus();
+         } else if(document.getElementById(activeNav).style.width == 0){
+               openNav(activeNav);
+              
           }else
-                openNav(activeNav);
+                closeNav(activeNav);
          
                    /*
           closeNav(menuIndex);
