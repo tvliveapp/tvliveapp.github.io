@@ -14,7 +14,7 @@ function openNav(idx) {
 
 function closeNav(idx) {
   
-  if (idx.search("mySidenav")>-1)
+
     document.getElementById(idx).style.width = "0";
 }
     
