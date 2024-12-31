@@ -26,6 +26,10 @@ console.log(activeNav);
 document.onkeydown = function(e) {
       console.log(e.keyCode,e.key) 
       document.getElementById("txt").innerHTML=e.key+" "+currentIndex;
+      
+      //
+      //
+  
       switch (e.keyCode) {
         case 37:
           if(activeNav=="mySidenav1"){
@@ -40,20 +44,20 @@ document.onkeydown = function(e) {
           }
           document.getElementById(activeNav).children[ document.getElementById(activeNav).activeIndex].focus();
           break;
+        //  0>>1>>2>>3>>2>>3
         case 39:
-         if(activeNav=="mySidenav1"){
-           closeNav(activeNav);
-          activeNav= document.activeElement.name;
-           openNav(activeNav);
-         } else if(activeNav==""){
-            activeNav="mySidenav1"
-            openNav("mySidenav1");
-         } else{
-             if(document.activeElement.parentElement.id==activeNav)
+          if(activeNav==""){
+              activeNav="mySidenav1"
+              openNav("mySidenav1");
+          } else if(activeNav=="mySidenav1"){
                closeNav(activeNav);
-              else
+               activeNav= document.activeElement.name;
+               openNav(activeNav);
+         } else if(document.activeElement.parentElement.id==activeNav)
+               closeNav(activeNav);
+          else
                 openNav(activeNav);
-         }
+         
                    /*
           closeNav(menuIndex);
           menuIndex = (menuIndex == 0) ? 0 : --menuIndex;
