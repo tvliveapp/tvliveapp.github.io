@@ -34,7 +34,7 @@ document.onkeydown = function(e) {
          } else if(activeNav==""){
             
          } else
-             close(activeNav);
+             closeNav(activeNav);
           
           break;
         case 39:
