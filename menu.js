@@ -35,6 +35,7 @@ document.onkeydown = function(e) {
             
          } else
              closeNav(activeNav);
+             openNav("mySidenav1");
           
           break;
         case 39:
