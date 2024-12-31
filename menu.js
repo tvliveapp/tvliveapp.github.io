@@ -1,4 +1,5 @@
-document.getElementById("mySidenav1").activeIndex=1;
+var mySidenav1 =document.getElementById("mySidenav1");
+mySidenav1.activeIndex=1;
 var elements = document.getElementsByClassName("arrow-togglable");
 var currentIndex = 0;
 console.log(elements)
@@ -51,9 +52,10 @@ document.onkeydown = function(e) {
                closeNav(activeNav);
                activeNav= document.activeElement.name;
                openNav(activeNav);
-         } else if(document.activeElement.parentElement.id==activeNav)
+         } else if(document.activeElement.parentElement.id==activeNav){
                closeNav(activeNav);
-          else
+               mySidenav1.focus();
+          }else
                 openNav(activeNav);
          
                    /*
