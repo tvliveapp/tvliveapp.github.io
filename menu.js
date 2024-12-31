@@ -52,7 +52,7 @@ document.onkeydown = function(e) {
                closeNav(activeNav);
                activeNav= document.activeElement.name;
                openNav(activeNav);
-         } else if(document.getElementById(activeNav).style.width == 0){
+         } else if(document.getElementById(activeNav).style.width == "0px"){
                openNav(activeNav);
               
           }else
