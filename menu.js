@@ -36,7 +36,7 @@ document.onkeydown = function(e) {
          } else
              closeNav(activeNav);
              openNav("mySidenav1");
-          
+          document.getElementById(activeNav).children[ document.getElementById(activeNav).activeIndex].focus();
           break;
         case 39:
          if(activeNav=="mySidenav1"){
