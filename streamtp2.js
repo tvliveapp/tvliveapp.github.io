@@ -3,7 +3,7 @@ var dataField = "";
 var outputField = "";
 
 
-channels={
+var channels={
     "ESPN 1": "https://streamtp2.com/global1.php?stream=espn1",
     "ESPN 2": "https://streamtp2.com/global1.php?stream=espn2",
     "ESPN 3": "https://streamtp2.com/global1.php?stream=espn3",
