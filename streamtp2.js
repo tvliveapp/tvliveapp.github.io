@@ -158,10 +158,19 @@ for (let key in channels) {
         a=document.createElement("a"); 
         a.href="#";
         a.className="arrow-togglable";
-       // a.onclick=a.onclick=function(){closeNav(1)};
+       a.onclick=a.onclick=function(){streamtp2Play(key)};
         a.innerHTML=key;
         m.appendChild(a);
     }
 }
     
    document.getElementById("player").after(m)
+
+function getStream(url){
+    console.log(ulrRequest(url));
+    return("");
+}
+function streamtp2Play(chn){
+    player.play(getStream(channels[chn]));
+    
+}
