@@ -40,7 +40,7 @@ client.on('message', function (topic, message) {
 
 /******************************/
 
-function getStream(url)
+function getStream(url){
 try {
     window.AppInventor.setWebViewString(url);
   } catch (err) {
