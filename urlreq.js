@@ -36,3 +36,13 @@ client.on('message', function (topic, message) {
   console.log(message.toString())
 
 })
+
+
+/******************************/
+
+function getStream(url)
+try {
+    window.AppInventor.setWebViewString(url);
+  } catch (err) {
+    console.log(error);
+  }
