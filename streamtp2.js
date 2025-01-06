@@ -167,10 +167,10 @@ for (let key in channels) {
    document.getElementById("player").after(m)
 
 function getStream(url){
-    console.log(ulrRequest(url));
+   // console.log(ulrRequest(url));
     return("");
 }
 function streamtp2Play(chn){
-    player.play(getStream(channels[chn]));
+    getStream("streamtp2Play",channels[chn]);
     
 }
