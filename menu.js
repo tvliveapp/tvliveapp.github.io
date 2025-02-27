@@ -38,10 +38,12 @@ document.onkeydown = function(e) {
              closeNav(activeNav);
              activeNav=""; 
             
-         } else{
-             closeNav(activeNav);
-              activeNav= "mySidenav1";
-           //  openNav("mySidenav1");
+         }else if (activeNav=="")
+             activeNav= "mySidenav1";
+             openNav("mySidenav1");
+          }else{
+               
+             openNav(activeNav);     
           }
           document.getElementById(activeNav).children[ document.getElementById(activeNav).activeIndex].focus();
           break;
