@@ -1,6 +1,6 @@
 //document.location="https://shawon9324.github.io/apps/keytester/"
     var player="";
-    var playbackURL = "https://24a.pricesaskeloadsc.com:443/global/nba06/index.m3u8?token=8d539af8f48c0a9839a52861065f1ad8166efd81-ee-1735558498-1735522498";
+    var playbackURL = "https://print.crackstreamslivehd.com/dsports/tracks-v1a1/mono.m3u8?ip=45.225.44.89&token=d860e3c18e69f55a20f4c22f143900b2cda6e1f1-d3-1751778134-1751724134";
     var p2pConfig = {
         live: true,
         trackerZone: 'us',    
