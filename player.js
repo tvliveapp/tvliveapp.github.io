@@ -1,6 +1,6 @@
 //document.location="https://shawon9324.github.io/apps/keytester/"
     var player="";
-    var playbackURL = "https://print.crackstreamslivehd.com/dsports/tracks-v1a1/mono.m3u8?ip=45.225.44.89&token=d860e3c18e69f55a20f4c22f143900b2cda6e1f1-d3-1751778134-1751724134";
+    var playbackURL = "https://doc1.crackstreamslivehd.com/espn/tracks-v1a1/mono.m3u8?ip=45.225.44.89&token=e59c46e2ae6eddd4262de709b95287b2ff3308e4-78-1753709012-1753655012";
     var p2pConfig = {
         live: true,
         trackerZone: 'us',    
