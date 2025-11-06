@@ -220,7 +220,7 @@
   const categoryTabs = document.getElementById('category-tabs');
   const numberOverlay = document.getElementById('number-overlay');
 
-  // 📺 Lista de categorías
+  // 📺 Lista de categorías con canales HLS añadidos
   const categorias = [
     {
       nombre: "TV en Vivo",
@@ -231,6 +231,13 @@
           video: "https://98ca2.crackstreamslivehd.com/espn2/index.m3u8?token=a156f65d787c4a63f3075b145e9a8f49ac99b0d5-df-1762446893-1762392893&ip=45.225.44.89",
           logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/ESPN_wordmark.svg",
           live: true
+        },
+        {
+          nombre: "Ecuavisa",
+          programa: "Deportes Extremos",
+          video: "https://jireh-3-hls-video-us-isp.dps.live/hls-video/c54ac2799874375c81c1672abb700870537c5223/ecuavisa/ecuavisa.smil/playlist.m3u8?dpssid=40cb047aec994130144f5291784736b7&sid=ba5t1l1xb2500082414690c30e7f3ff5&ndvc=0",
+          logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/Sports_icon.svg",
+          live: true
         }
       ]
     },
@@ -238,7 +245,14 @@
       nombre: "Noticias",
       canales: [
         {nombre: "Canal 2 - Internacional", programa: "Noticias globales", video: "https://www.w3schools.com/html/mov_bbb.mp4", logo: "https://upload.wikimedia.org/wikipedia/commons/6/6c/TV_icon_2.svg"},
-        {nombre: "Canal 3 - Nacional", programa: "Titulares del día", video: "https://www.w3schools.com/html/movie.mp4", logo: "https://upload.wikimedia.org/wikipedia/commons/6/6c/TV_icon_2.svg"}
+        {nombre: "Canal 3 - Nacional", programa: "Titulares del día", video: "https://www.w3schools.com/html/movie.mp4", logo: "https://upload.wikimedia.org/wikipedia/commons/6/6c/TV_icon_2.svg"},
+        {
+          nombre: "Canal 7 - HLS Noticias",
+          programa: "Últimas Noticias",
+          video: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
+          logo: "https://upload.wikimedia.org/wikipedia/commons/8/8f/News_icon.svg",
+          live: true
+        }
       ]
     },
     {
@@ -379,15 +393,19 @@
         if (!panelVisible) changeChannel();
         break;
       case "Enter":
-        if (panelVisible) { changeChannel(); panelVisible = false; panel.classList.remove("visible"); }
+        changeChannel();
         break;
       case "Escape":
         panelVisible = false;
         panel.classList.remove("visible");
+        overlay.classList.add("hidden");
         break;
     }
+    updateSelection();
   });
-</script>
 
+  // Reproducir primer canal al iniciar
+  changeChannel();
+</script>
 </body>
 </html>
