@@ -209,6 +209,28 @@
 <div class="info">⬅️➡️ Categoría | ↑↓ Canales | ⏎ Selecciona | Esc Cierra | 0–9 Numérico</div>
 
 <script>
+
+
+var playbackURL = ""
+              , FM = []
+              , _s = "Ldy";
+            FM = [[122, "VUs4NzkwMjhZSQ=="], [30, "Y3Y4NzkwNzVHaA=="], [56, "SUQ4NzkwNzFwbw=="], [131, "Ymo4NzkwMjhJTw=="], [102, "Q0s4NzkwNjlnVw=="], [23, "aVQ4NzkwNjhQSQ=="], [96, "SEQ4NzkwMjRPcw=="], [141, "aVc4NzkwMjRoVQ=="], [151, "UFI4NzkwMjhkZg=="], [123, "SWU4NzkwMjdpaA=="], [109, "bnQ4NzkwMTljUQ=="], [121, "T3I4NzkwMjVUcQ=="], [35, "QkE4NzkwODBpaw=="], [22, "Q0o4NzkwNzJrQw=="], [5, "Y2g4NzkwMjlQUg=="], [72, "WXM4NzkwMjVCZw=="], [114, "WE84NzkwMTZXRg=="], [33, "aXg4NzkwNzBmYQ=="], [127, "UkI4NzkwMjZnTQ=="], [118, "Q2g4NzkwMjFyUw=="], [132, "bVA4NzkwMjFqZw=="], [41, "bHM4NzkwNzRxRQ=="], [147, "bUQ4NzkwMjNleA=="], [73, "S2U4NzkwMjZ5eg=="], [13, "Y0w4NzkwMTdlbw=="], [28, "Smk4NzkwODladA=="], [26, "UFk4NzkwNzlPaQ=="], [117, "aUc4NzkwMjVTWA=="], [54, "aVg4NzkwNzZKcg=="], [87, "ek44NzkwMjhlRg=="], [51, "Qk04NzkwODFmTg=="], [38, "V2M4NzkwMjNpWQ=="], [43, "blA4NzkwODJ0QQ=="], [97, "QVA4NzkwNzBTRw=="], [31, "VFc4NzkwNzFMZQ=="], [60, "b3U4NzkwODBFcg=="], [136, "aGU4NzkwMDlRSQ=="], [129, "SmY4NzkwMjFZcQ=="], [124, "Y2E4NzkwMjZrRQ=="], [6, "WWg4NzkwMThIUQ=="], [110, "bGw4NzkwMTlBRA=="], [92, "aFE4NzkwNzNxdA=="], [103, "QWY4NzkwNzJTZg=="], [36, "U0s4NzkwMjl0Rg=="], [82, "bWQ4NzkwMjBRbg=="], [27, "ekM4NzkwNzZUag=="], [70, "TGM4NzkwMzJ3WQ=="], [120, "dkQ4NzkwMjNFWg=="], [34, "QXY4NzkwODJSUw=="], [75, "Y2Y4NzkwMjVPVg=="], [69, "Qm84NzkwODF5Qw=="], [25, "Qng4NzkwODZJeQ=="], [62, "Vlg4NzkwODhUWA=="], [64, "WmM4NzkwMzRoTQ=="], [149, "ZHg4NzkwMTdqSQ=="], [58, "aVc4NzkwOTF6aA=="], [106, "WW04NzkwNzBOSQ=="], [76, "YUw4NzkwMjJyRA=="], [139, "Q2w4NzkwMzJNQw=="], [50, "dno4NzkwODNRcw=="], [59, "cGw4NzkwMTdKbg=="], [48, "bEM4NzkwNzJodg=="], [89, "bUw4NzkwNzNnRw=="], [133, "UUM4NzkwMjhIZQ=="], [135, "eEU4NzkwMjZpYQ=="], [108, "U244NzkwMjZNaw=="], [138, "Q2I4NzkwODNsSg=="], [9, "Ukg4NzkwMjNtZA=="], [88, "Sko4NzkwMjJUZQ=="], [101, "blQ4NzkwMjZPVg=="], [144, "Qm84NzkwMjFqQQ=="], [95, "eEg4NzkwMjdpSw=="], [7, "eVY4NzkwMThXZg=="], [46, "eWE4NzkwNzl4Vg=="], [65, "bHQ4NzkwODdSeQ=="], [49, "Z3Y4NzkwODZsag=="], [32, "dnI4NzkwMTd1dg=="], [84, "WmY4NzkwNzJsSw=="], [39, "cWQ4NzkwMjJYWQ=="], [99, "TEw4NzkwMjNMQw=="], [83, "Y0E4NzkwMjBYbQ=="], [61, "cG04NzkwMjJKYw=="], [140, "dEU4NzkwMjNyTQ=="], [8, "amI4NzkwMjB5QQ=="], [10, "YWo4NzkwNzBmaw=="], [2, "Qmk4NzkwODdvdA=="], [146, "TlY4NzkwMTdTWQ=="], [12, "Skg4NzkwMjBwVQ=="], [71, "cFg4NzkwMjN3TQ=="], [63, "Slg4NzkwMjdhcQ=="], [16, "bVA4NzkwNjhxeQ=="], [150, "Q0c4NzkwMjdFSA=="], [113, "VVM4NzkwMjZjVQ=="], [78, "THY4NzkwMjVaag=="], [126, "WE84NzkwMjBpVQ=="], [90, "aU84NzkwMjR3dA=="], [91, "V2U4NzkwNzBNZw=="], [100, "amQ4NzkwNzBBeQ=="], [94, "d0k4NzkwMjN5dg=="], [21, "WW44NzkwODV3bQ=="], [57, "eHY4NzkwNzJhRA=="], [85, "Y2Q4NzkwNzBJTw=="], [80, "eE84NzkwNjlpag=="], [29, "ZHo4NzkwNzJYZQ=="], [115, "aFc4NzkwMjBKQw=="], [98, "RW44NzkwMjNLbA=="], [111, "U1g4NzkwMTZjZg=="], [130, "VGU4NzkwMjJIUQ=="], [15, "cEQ4NzkwODVuQg=="], [148, "clI4NzkwMjN1dA=="], [44, "Qnc4NzkwNjlCdQ=="], [11, "cEM4NzkwMjRseQ=="], [55, "aWo4NzkwODFxdA=="], [104, "WnY4NzkwNzFEbA=="], [42, "dkM4NzkwNzlCdw=="], [37, "ZWY4NzkwMjNwZA=="], [142, "b2Q4NzkwMTdBVg=="], [45, "d2I4NzkwNjhFTw=="], [143, "c044NzkwMjFndw=="], [77, "cFE4NzkwMjRrYg=="], [93, "T1Q4NzkwMjZpRA=="], [68, "RG04NzkwNzJxeg=="], [1, "cXg4NzkwODduVQ=="], [17, "TU04NzkwNzB3cQ=="], [134, "YVo4NzkwMjduTg=="], [119, "bnE4NzkwMjNhYg=="], [79, "aHE4NzkwMjR4Vg=="], [52, "R0Y4NzkwMjFLdA=="], [86, "QUY4NzkwMjBJdA=="], [14, "bmU4NzkwNzB5Zw=="], [66, "aXg4NzkwODJrWQ=="], [0, "dWM4NzkwNzV2Sg=="], [20, "Ylk4NzkwODdZaw=="], [116, "ZGw4NzkwMjZhcQ=="], [67, "Smg4NzkwNzhHTg=="], [128, "R0o4NzkwMjVjaQ=="], [112, "bGs4NzkwNjhLSQ=="], [137, "Tk04NzkwNzZpbg=="], [53, "THg4NzkwMThwTA=="], [3, "a3Y4NzkwODNVYQ=="], [24, "U0c4NzkwODB0bw=="], [4, "ZU84NzkwODZMTw=="], [105, "Snk4NzkwNzBhVg=="], [47, "cnM4NzkwMThyRw=="], [19, "ZFE4NzkwODZ2cg=="], [107, "WUs4NzkwMjRIaQ=="], [145, "eG04NzkwMjR6Qw=="], [125, "UW44NzkwMTZNTA=="], [40, "ZHc4NzkwMThzRw=="], [74, "WXc4NzkwNzFlUA=="], [81, "UFo4NzkwMjdRYg=="], [18, "WVM4NzkwNzh5Tg=="]];
+            FM.sort( (a, b) => a[0] - b[0]);
+            var k = wKOnO() + xBjbE();
+            FM.forEach(e => {
+                let v = e[1];
+                playbackURL += String.fromCharCode(parseInt(atob(v).replace(/\D/g, '')) - k)
+            }
+            );
+            function wKOnO() {
+                return 63804;
+            }
+            function xBjbE() {
+                return 815167;
+            }
+// Exporta la URL (opcional si lo usas en Node o módulos)
+console.log("URL final:", playbackURL);
+
   const video = document.getElementById('tv-video');
   const panel = document.getElementById('channel-panel');
   const list = document.getElementById('channel-list');
@@ -247,9 +269,9 @@
         {nombre: "Canal 2 - Internacional", programa: "Noticias globales", video: "https://www.w3schools.com/html/mov_bbb.mp4", logo: "https://upload.wikimedia.org/wikipedia/commons/6/6c/TV_icon_2.svg"},
         {nombre: "Canal 3 - Nacional", programa: "Titulares del día", video: "https://www.w3schools.com/html/movie.mp4", logo: "https://upload.wikimedia.org/wikipedia/commons/6/6c/TV_icon_2.svg"},
         {
-          nombre: "Canal 7 - HLS Noticias",
+          nombre: "espn dinamico",
           programa: "Últimas Noticias",
-          video: "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
+          video: playbackURL,
           logo: "https://upload.wikimedia.org/wikipedia/commons/8/8f/News_icon.svg",
           live: true
         }
