@@ -81,6 +81,7 @@ var websocketclient = {
 
     'onConnect': function () {
         websocketclient.connected = true;
+        document.getElementById('connection-status').innerText = 'Connected';
         console.log("connected");
         websocketclient.subscribe("server11",0,"");
 
