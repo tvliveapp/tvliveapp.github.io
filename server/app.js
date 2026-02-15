@@ -125,7 +125,7 @@ var websocketclient = {
         console.log(messageObj);
         try {
           // Code that might throw an error (exception)
-            window.AppInventor.setWebViewString("mqtt:"+messageObj.'payload');
+            window.AppInventor.setWebViewString("mqtt:"+messageObj'payload');
         } catch (error) {
           console.log("NO server")
         }
