@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html><head><title>MQTT - KIO4.COM</title>
+<script type='text/javascript' src='http://test.mosquitto.org/mosquitto.js'></script>
+<script type='text/javascript' src='http://code.jquery.com/jquery-1.7.2.min.js '></script>
+</head><body>
+ 
+<div id="broker">
+<h2>Broker</h2>
+<input class="but" id="connect-button" type="button" value="Conectar">
+<input class="but" id="disconnect-button" type="button" value="Desconectar">
+</div>
+
+<div id="publish">
+<h2>Publish</h2>
+<p>Topic: <input class="txt" id="pub-topic-text" type="text" value="juan/led2"></p>
+<p>Payload: <input class="txt" id="payload-text" type="text" value="b"></p>
+</div>
+
+<div id="subscribe">
+<h2>Subscribe/Unsubscribe</h2>
+<input class="but" id="publish-button" type="button" value="Publish">
+<p>Topic: <input class="txt" id="sub-topic-text" type="text" value="juan/led2"></p>
+
+<input name="button" type="button" class="but" id="subscribe-button" value="Subscribe">
+<input class="but" id="unsubscribe-button" type="button" value="Unsubscribe">
+</div>
+
+<script src="tmo.js" type="text/javascript"></script>
+</body></html>
+
+- Los tres archivos indicados en mosquitto.htm, también se podrían haber obtenidos desde el "exterior" de esta manera:
+
+<s
