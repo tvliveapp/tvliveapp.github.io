@@ -1,33 +1,54 @@
 <!DOCTYPE html>
-<html><head><title>MQTT - KIO4.COM</title>
-<script type='text/javascript' src='https://test.mosquitto.org/mosquitto.js'></script>
-<script type='text/javascript' src='https://code.jquery.com/jquery-1.7.2.min.js '></script>
-</head><body>
- 
-<div id="broker">
-<h2>Broker</h2>
-<input class="but" id="connect-button" type="button" value="Conectar">
-<input class="but" id="disconnect-button" type="button" value="Desconectar">
-</div>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar Mensajes a HiveMQ</title>
+</head>
+<body>
+    <h1>Aplicación Web MQTT con HiveMQ</h1>
+    <textarea id="message" placeholder="Escribe tu mensaje"></textarea>
+    <button id="sendBtn">Enviar</button>
 
-<div id="publish">
-<h2>Publish</h2>
-<p>Topic: <input class="txt" id="pub-topic-text" type="text" value="juan/led2"></p>
-<p>Payload: <input class="txt" id="payload-text" type="text" value="b"></p>
-</div>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script>
+        // Datos de conexión de tu broker HiveMQ Cloud
+        const brokerUrl = 'wss://<tu-cluster-id>.mqtt.hivemq.cloud:8000';
+        const clientId = 'your-client-id'; // Puedes usar un valor único aquí
+        const username = 'your-username'; // Usualmente "public" o tu propio nombre
+        const password = 'your-password'; // Si tu broker lo requiere
 
-<div id="subscribe">
-<h2>Subscribe/Unsubscribe</h2>
-<input class="but" id="publish-button" type="button" value="Publish">
-<p>Topic: <input class="txt" id="sub-topic-text" type="text" value="juan/led2"></p>
+        // Conectar al broker de HiveMQ
+        const client = mqtt.connect(brokerUrl, {
+            clientId: clientId,
+            username: username,
+            password: password
+        });
 
-<input name="button" type="button" class="but" id="subscribe-button" value="Subscribe">
-<input class="but" id="unsubscribe-button" type="button" value="Unsubscribe">
-</div>
+        client.on('connect', function () {
+            console.log('Conectado al broker de HiveMQ');
+            // Suscribirse a un tópico (si quieres recibir mensajes)
+            client.subscribe('test/topic', function (err) {
+                if (!err) {
+                    console.log('Suscrito al tópico test/topic');
+                }
+            });
+        });
 
-<script src="tmo.js" type="text/javascript"></script>
-</body></html>
+        // Enviar mensajes al broker
+        document.getElementById('sendBtn').onclick = function () {
+            const message = document.getElementById('message').value;
+            if (message) {
+                client.publish('test/topic', message); // Publicar en el tópico
+                console.log('Mensaje enviado:', message);
+            }
+        };
 
-- Los tres archivos indicados en mosquitto.htm, también se podrían haber obtenidos desde el "exterior" de esta manera:
-
-<s
+        // Recibir mensajes del tópico suscrito
+        client.on('message', function (topic, message) {
+            console.log(`Nuevo mensaje en el tópico ${topic}: ${message.toString()}`);
+            // Mostrar el mensaje en la página si lo deseas
+        });
+    </script>
+</body>
+</html>
