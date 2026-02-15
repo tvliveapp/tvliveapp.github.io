@@ -39,13 +39,16 @@
     <textarea id="message" placeholder="Escribe tu mensaje"></textarea>
     <br><br>
 
-    <button id="sendBtn">Enviar</button>
-
+    <button id="sendBtn" disabled>Enviar</button> <!-- Botón de enviar (deshabilitado inicialmente) -->
+    <button id="connectBtn">Conectar</button> <!-- Botón de conectar -->
+    
     <h3>Mensajes Recibidos:</h3>
     <div id="receivedMessages"></div>
 
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <script>
+        let client;
+
         // Función para obtener los datos de conexión desde los campos de la interfaz
         function getConnectionData() {
             return {
@@ -56,12 +59,12 @@
             };
         }
 
-        // Conectar al broker MQTT
+        // Función para conectar al broker MQTT
         function connectToBroker() {
             const { brokerUrl, clientId, username, password } = getConnectionData();
 
             // Conectar al broker de HiveMQ
-            const client = mqtt.connect(brokerUrl, {
+            client = mqtt.connect(brokerUrl, {
                 clientId: clientId,
                 username: username,
                 password: password
@@ -69,6 +72,7 @@
 
             client.on('connect', function () {
                 console.log('Conectado al broker de HiveMQ');
+                document.getElementById('sendBtn').disabled = false; // Habilitar el botón de "Enviar" después de conectar
 
                 // Suscribirse al tópico de suscripción
                 const subscribeTopic = document.getElementById('subscribeTopic').value || 'test/topic';
@@ -79,16 +83,10 @@
                 });
             });
 
-            // Enviar mensajes al broker
-            document.getElementById('sendBtn').onclick = function () {
-                const message = document.getElementById('message').value;
-                const publishTopic = document.getElementById('publishTopic').value || 'test/topic'; // Tópico por defecto si no se ingresa uno
-
-                if (message && publishTopic) {
-                    client.publish(publishTopic, message); // Publicar en el tópico
-                    console.log(`Mensaje enviado al tópico ${publishTopic}: ${message}`);
-                }
-            };
+            client.on('error', function (err) {
+                console.error('Error de conexión:', err);
+                alert('Error de conexión: ' + err.message);
+            });
 
             // Recibir mensajes del tópico suscrito
             client.on('message', function (topic, message) {
@@ -100,24 +98,23 @@
             });
         }
 
-        // Llamar a la función de conexión cuando la página cargue
-        window.onload = function () {
-            connectToBroker();
+        // Enviar mensajes al broker
+        document.getElementById('sendBtn').onclick = function () {
+            const message = document.getElementById('message').value;
+            const publishTopic = document.getElementById('publishTopic').value || 'test/topic'; // Tópico por defecto si no se ingresa uno
+
+            if (message && publishTopic && client) {
+                client.publish(publishTopic, message); // Publicar en el tópico
+                console.log(`Mensaje enviado al tópico ${publishTopic}: ${message}`);
+            }
         };
 
-        // Actualizar la conexión si los datos de conexión cambian
-        document.getElementById('brokerUrl').addEventListener('input', function () {
+        // Conectar al broker cuando el usuario haga clic en "Conectar"
+        document.getElementById('connectBtn').onclick = function () {
             connectToBroker();
-        });
-        document.getElementById('clientId').addEventListener('input', function () {
-            connectToBroker();
-        });
-        document.getElementById('username').addEventListener('input', function () {
-            connectToBroker();
-        });
-        document.getElementById('password').addEventListener('input', function () {
-            connectToBroker();
-        });
+            this.disabled = true; // Deshabilitar el botón de "Conectar" después de hacer clic
+            alert('Intentando conectar al broker...');
+        };
     </script>
 </body>
 </html>
