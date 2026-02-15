@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="Try HiveMQ MQTT browser client – a websocket client that you can use to experiment with publishing and subscribing MQTT messages over port 8000">
+    <title>MQTT Websocket Client</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        #header {
+            background-color: #333;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        #header img {
+            width: 200px;
+        }
+
+        #header span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #connection,
+        #publish-sub,
+        #messages {
+            margin: 20px;
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .row {
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        #connection-status {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: green;
+        }
+
+        #messages ul {
+            padding: 0;
+            list-style-type: none;
+        }
+
+        #messages li {
+            background-color: #f1f1f1;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+
+        #error-console {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+        }
+
+        .subscribed-topic {
+            background-color: #80b6df;
+            padding: 10px;
+            margin: 5px 0;
+            color: #fff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body class="notconnected">
+
+    <div id="header">
+        <a href="https://www.hivemq.com">
+            <img src="assets/hivemq-logo.svg" alt="HiveMQ Logo" title="HiveMQ">
+        </a>
+        <span id="headertitle">Websockets Client Showcase</span>
+    </div>
+
+    <div id="content">
+
+        <!-- Connection Panel -->
+        <div id="connection" class="panel">
+            <h3>Connection Settings</h3>
+            <div id="connection-status">Not connected</div>
+            <form>
+                <!-- Username and Password input -->
+                <div class="row input-group">
+                    <label for="userInput">Username</label>
+                    <input id="userInput" type="text">
+                </div>
+
+                <div class="row input-group">
+                    <label for="pwInput">Password</label>
+                    <input id="pwInput" type="password">
+                </div>
+
+                <div class="row input-group">
+                    <button type="button" id="connectButton" class="btn" onclick="websocketclient.connect();">Connect</button>
+                    <button type="button" id="disconnectButton" class="btn" onclick="websocketclient.disconnect();">Disconnect</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Publish Panel -->
+        <div id="publish-sub" class="panel">
+            <h3>Publish Message</h3>
+            <form>
+                <div class="row input-group">
+                    <label for="publishTopic">Topic</label>
+                    <input id="publishTopic" type="text" value="testtopic/1">
+                </div>
+
+                <div class="row input-group">
+                    <label for="publishQoSInput">QoS</label>
+                    <select id="publishQoSInput" class="small">
+                        <option>0</option>
+                        <option>1</option>
+                        <option>2</option>
+                    </select>
+                </div>
+
+                <div class="row input-group">
+                    <label for="publishRetain">Retain</label>
+                    <input id="publishRetain" type="checkbox">
+                </div>
+
+                <div class="row input-group">
+                    <label for="publishPayload">Message</label>
+                    <textarea id="publishPayload"></textarea>
+                </div>
+
+                <div class="row input-group">
+                    <button type="button" id="publishButton" class="btn" onclick="websocketclient.publish($('#publishTopic').val(),$('#publishPayload').val(),parseInt($('#publishQoSInput').val(),10),$('#publishRetain').is(':checked'))">Publish</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Messages Section -->
+        <div id="messages" class="panel">
+            <h3>Messages</h3>
+            <ul id="messEdit"></ul>
+        </div>
+
+        <!-- Error Console -->
+        <div id="error-console"></div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/4.2.3/js/foundation.min.js"></script>
+    <script src="mqttws31.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        $(document).foundation();
+    </script>
+
+</body>
+
+</html>
