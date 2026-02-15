@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicación Web MQTT con HiveMQ</title>
+    <title>Aplicación Web MQTT con mqtt-dashboard.com</title>
 </head>
 <body>
-    <h1>Aplicación Web MQTT con HiveMQ</h1>
+    <h1>Aplicación Web MQTT con mqtt-dashboard.com</h1>
 
     <!-- Campos para configurar los datos de conexión -->
     <h3>Datos de Conexión MQTT</h3>
     <label for="brokerUrl">URL del Broker:</label>
-    <input type="text" id="brokerUrl" value="wss://mycluster123.mqtt.hivemq.cloud:8000" placeholder="Ejemplo: wss://mycluster123.mqtt.hivemq.cloud:8000">
+    <input type="text" id="brokerUrl" value="wss://mqtt-dashboard.com:8884" placeholder="Ejemplo: wss://mqtt-dashboard.com:8884">
     <br><br>
 
     <label for="clientId">Client ID:</label>
@@ -63,7 +63,7 @@
         function connectToBroker() {
             const { brokerUrl, clientId, username, password } = getConnectionData();
 
-            // Conectar al broker de HiveMQ
+            // Conectar al broker de mqtt-dashboard.com
             client = mqtt.connect(brokerUrl, {
                 clientId: clientId,
                 username: username,
@@ -71,7 +71,7 @@
             });
 
             client.on('connect', function () {
-                console.log('Conectado al broker de HiveMQ');
+                console.log('Conectado al broker de mqtt-dashboard.com');
                 document.getElementById('sendBtn').disabled = false; // Habilitar el botón de "Enviar" después de conectar
 
                 // Suscribirse al tópico de suscripción
