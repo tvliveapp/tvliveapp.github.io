@@ -16,6 +16,15 @@
  * @author: Christoph Schäbel
  */
 
+
+function randomString(length) {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        for (var i = 0; i < length; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        return text;
+    }
+
 var websocketclient = {
     'client': null,
     'lastMessageId': 1,
@@ -29,7 +38,7 @@ var websocketclient = {
     'connect': function () {
         var host = 'mqtt-dashboard.com';
         var port = 8884;
-        var clientId = $('#clientIdInput').val();
+        var clientId = randomString(10);
         var username = "";
         var password = "";
         var keepAlive = 60;
@@ -114,6 +123,12 @@ var websocketclient = {
         };
 
         console.log(messageObj);
+        try {
+          // Code that might throw an error (exception)
+            window.AppInventor.setWebViewString("mqtt:"+messageObj.'payload');
+        } catch (error) {
+          console.log("NO server")
+        }
     },
 
     'disconnect': function () {
