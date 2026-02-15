@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <meta name="description" content="MQTT WebSocket Client">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MQTT WebSocket Client</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/4.2.3/css/foundation.min.css">
 </head>
@@ -12,122 +11,162 @@
         <h1>MQTT WebSocket Client</h1>
     </div>
 
-    <!-- Formulario de conexión -->
-    <div id="connection">
-        <label>Host</label>
-        <input id="urlInput" type="text" value="broker.mqttdashboard.com" />
-
-        <label>Port</label>
-        <input id="portInput" type="text" value="8000" />
-
-        <label>Client ID</label>
-        <input id="clientIdInput" type="text" value="clientId-1" />
-
-        <button id="connectButton" onclick="connect()">Connect</button>
-        <button id="disconnectButton" onclick="disconnect()" disabled>Disconnect</button>
+    <div id="connection" class="row">
+        <div class="large-4 columns">
+            <label>Host</label>
+            <input id="urlInput" type="text" value="broker.mqttdashboard.com">
+        </div>
+        <div class="large-2 columns">
+            <label>Port</label>
+            <input id="portInput" type="text" value="8000">
+        </div>
+        <div class="large-4 columns">
+            <label>ClientID</label>
+            <input id="clientIdInput" type="text" value="clientId-1">
+        </div>
+        <div class="large-2 columns">
+            <button id="connectButton" class="button" onclick="websocketclient.connect()">Connect</button>
+            <button id="disconnectButton" class="button" onclick="websocketclient.disconnect()" disabled>Disconnect</button>
+        </div>
     </div>
 
-    <!-- Formulario para publicar mensajes -->
-    <div id="publish">
-        <label>Topic</label>
-        <input id="publishTopic" type="text" value="test/topic" />
-
-        <label>Message</label>
-        <textarea id="publishMessage"></textarea>
-
-        <button onclick="publish()">Publish</button>
+    <div id="publish" class="row" style="display: none;">
+        <div class="large-4 columns">
+            <label>Topic</label>
+            <input id="publishTopic" type="text" value="test/topic">
+        </div>
+        <div class="large-4 columns">
+            <label>Message</label>
+            <textarea id="publishMessage"></textarea>
+        </div>
+        <div class="large-2 columns">
+            <button class="button" onclick="websocketclient.publish()">Publish</button>
+        </div>
     </div>
 
-    <!-- Mensajes recibidos -->
-    <div id="messages">
-        <h3>Received Messages</h3>
+    <div id="messages" class="row" style="display: none;">
+        <h3>Messages</h3>
         <ul id="messageList"></ul>
     </div>
 
-    <script src="https://raw.githubusercontent.com/hivemq/hivemq-mqtt-web-client/refs/heads/master/js/mqttws31.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqttws31/1.0.1/mqttws31.min.js"></script>
     <script>
-        var client;
+        var websocketclient = {
+            client: null,
+            subscriptions: [],
+            messages: [],
+            connected: false,
 
-        // Función para conectarse al broker MQTT
-        function connect() {
-            var host = document.getElementById('urlInput').value;
-            var port = parseInt(document.getElementById('portInput').value, 10);
-            var clientId = document.getElementById('clientIdInput').value;
+            connect: function() {
+                var host = document.getElementById('urlInput').value;
+                var port = parseInt(document.getElementById('portInput').value, 10);
+                var clientId = document.getElementById('clientIdInput').value;
 
-            // Crear cliente MQTT usando WebSockets
-            client = new Paho.MQTT.Client(host, port, clientId);
-            client.onConnectionLost = onConnectionLost;
-            client.onMessageArrived = onMessageArrived;
+                // Crear cliente MQTT utilizando WebSocket
+                this.client = new Paho.MQTT.Client(host, port, clientId);
+                this.client.onConnectionLost = this.onConnectionLost;
+                this.client.onMessageArrived = this.onMessageArrived;
 
-            // Opciones de conexión
-            var options = {
-                onSuccess: onConnect,
-                onFailure: onFail
-            };
+                var options = {
+                    onSuccess: this.onConnect,
+                    onFailure: this.onFail
+                };
 
-            // Conectar al broker
-            client.connect(options);
+                // Conectar al broker
+                this.client.connect(options);
 
-            // Deshabilitar botón de conectar y habilitar botón de desconectar
-            document.getElementById('connectButton').disabled = true;
-            document.getElementById('disconnectButton').disabled = false;
-        }
+                // Cambiar estado de los botones
+                document.getElementById('connectButton').disabled = true;
+                document.getElementById('disconnectButton').disabled = false;
+            },
 
-        // Función cuando la conexión es exitosa
-        function onConnect() {
-            console.log("Connected successfully!");
+            onConnect: function() {
+                websocketclient.connected = true;
+                console.log("Connected to the broker!");
 
-            // Ocultar formulario de conexión y mostrar formulario de publicación
-            document.getElementById('connection').style.display = 'none';
-            document.getElementById('publish').style.display = 'block';
+                // Mostrar formulario de publicación y mensajes
+                document.getElementById('connection').style.display = 'none';
+                document.getElementById('publish').style.display = 'block';
+                document.getElementById('messages').style.display = 'block';
 
-            // Suscribirse a un tópico para recibir mensajes
-            client.subscribe("test/topic", { qos: 0 });
-        }
+                // Suscribirse a un tópico (ejemplo)
+                websocketclient.subscribe("test/topic");
+            },
 
-        // Función cuando la conexión falla
-        function onFail(message) {
-            console.log("Connection failed: " + message.errorMessage);
-            alert("Error: " + message.errorMessage);
-            document.getElementById('connectButton').disabled = false;
-        }
+            onFail: function(message) {
+                console.log("Connection failed: " + message.errorMessage);
+                alert("Connection failed: " + message.errorMessage);
+            },
 
-        // Función cuando se pierde la conexión
-        function onConnectionLost(responseObject) {
-            if (responseObject.errorCode !== 0) {
+            onConnectionLost: function(responseObject) {
+                websocketclient.connected = false;
                 console.log("Connection lost: " + responseObject.errorMessage);
+                alert("Connection lost: " + responseObject.errorMessage);
+                document.getElementById('connection').style.display = 'block';
+                document.getElementById('publish').style.display = 'none';
+                document.getElementById('messages').style.display = 'none';
+
+                // Habilitar botón de conectar y deshabilitar botón de desconectar
+                document.getElementById('connectButton').disabled = false;
+                document.getElementById('disconnectButton').disabled = true;
+            },
+
+            onMessageArrived: function(message) {
+                var messageObj = {
+                    topic: message.destinationName,
+                    payload: message.payloadString,
+                    timestamp: new Date().toLocaleString()
+                };
+
+                websocketclient.messages.push(messageObj);
+                websocketclient.renderMessages();
+            },
+
+            disconnect: function() {
+                if (this.client) {
+                    this.client.disconnect();
+                }
+                this.connected = false;
+                console.log("Disconnected from the broker");
+
+                document.getElementById('connectButton').disabled = false;
+                document.getElementById('disconnectButton').disabled = true;
+            },
+
+            publish: function() {
+                var topic = document.getElementById('publishTopic').value;
+                var payload = document.getElementById('publishMessage').value;
+                var message = new Paho.MQTT.Message(payload);
+                message.destinationName = topic;
+
+                this.client.send(message);
+                console.log("Message sent: " + payload);
+            },
+
+            subscribe: function(topic) {
+                if (this.connected) {
+                    this.client.subscribe(topic, { qos: 0 });
+                    console.log("Subscribed to topic: " + topic);
+                }
+            },
+
+            renderMessages: function() {
+                var messageList = document.getElementById('messageList');
+                messageList.innerHTML = '';  // Limpiar lista de mensajes
+
+                websocketclient.messages.forEach(function(message) {
+                    var li = document.createElement('li');
+                    li.textContent = "Topic: " + message.topic + " | " + message.payload + " | " + message.timestamp;
+                    messageList.appendChild(li);
+                });
             }
-            document.getElementById('connection').style.display = 'block';
-            document.getElementById('publish').style.display = 'none';
+        };
+
+        // Inicializar el cliente cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', function() {
+            websocketclient.connected = false;
             document.getElementById('disconnectButton').disabled = true;
-            document.getElementById('connectButton').disabled = false;
-        }
-
-        // Función cuando llega un mensaje
-        function onMessageArrived(message) {
-            console.log("Message arrived: " + message.payloadString);
-            var messageList = document.getElementById('messageList');
-            var li = document.createElement('li');
-            li.textContent = "Topic: " + message.destinationName + ", Message: " + message.payloadString;
-            messageList.appendChild(li);
-        }
-
-        // Función para desconectar
-        function disconnect() {
-            client.disconnect();
-            document.getElementById('disconnectButton').disabled = true;
-            document.getElementById('connectButton').disabled = false;
-        }
-
-        // Función para publicar un mensaje
-        function publish() {
-            var topic = document.getElementById('publishTopic').value;
-            var message = document.getElementById('publishMessage').value;
-            var mqttMessage = new Paho.MQTT.Message(message);
-            mqttMessage.destinationName = topic;
-            client.send(mqttMessage);
-            console.log("Message published: " + message);
-        }
+        });
     </script>
 </body>
 </html>
