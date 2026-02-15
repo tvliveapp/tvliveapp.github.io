@@ -39,7 +39,7 @@
 			};
 		}
 		Page.prototype.connect = function(){
-			var url = "ws://test.mosquitto.org:8080/mqtt"; 
+			var url = "wss://mqtt-dashboard.com"; 
 			// var url = "mqtt.eclipse.org:1883";
 			mosq.connect(url);
 		};
