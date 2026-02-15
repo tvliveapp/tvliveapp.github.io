@@ -14,11 +14,95 @@
 <body class="notconnected">
 <div id="header">
     <div>
-        <a href="https://www.hivemq.com"><img id="headerlogo" src="assets/hivemq-logo.svg" alt"HiveMQ Logo" title="HiveMQ" style="width: 275px; height: 65px"></a>
+        <a href="https://www.hivemq.com"><img id="headerlogo" src="assets/hivemq-logo.svg" alt="HiveMQ Logo" title="HiveMQ" style="width: 275px; height: 65px"></a>
         <span id="headertitle">Websockets Client Showcase</span>
     </div>
 </div>
 <div id="content" class="row">
+<!-- Cloud Banner Start -->
+<div class="row large-12 columns hivemq-cloud">
+<div class="large-12 columns">
+    <a href="https://console.hivemq.cloud/?utm_source=mqtt-web-client&utm_medium=banner&utm_campaign=cloud" title="Get your free HiveMQ Cloud account" class="panel hivemq-cloud-container">
+        <div class="hivemq-cloud-icon">
+            <img src="https://www.hivemq.com/img/svg/hivemq-cloud.svg" width="150" height="50" alt="HiveMQ Cloud Logo">
+        </div>
+
+        <div class="hivemq-cloud-title">
+            <h3>Need a fully managed MQTT broker?</h3>
+            <p>
+                Get your own Cloud broker and connect up to 100 devices for free.
+            </p>
+        </div>
+
+        <button role="button" class="hivemq-cloud-btn">Get your free account</button>
+    </a>
+</div>
+
+<style>
+.hivemq-cloud {
+    width: 100% !important;
+    margin-bottom: 2rem !important;
+}
+
+.hivemq-cloud-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg, #80b6df 0%, #ebf2f9 40%, #ebf2f9 60%, #80b6df 100%);
+    padding: 0.5rem;
+    gap: 2rem;
+}
+
+.hivemq-cloud-btn {
+    background-color: #ffc000;
+    border-radius: 5px;
+    font-size: 16px;
+    min-width: 140px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 400;
+    color: #333;
+    transition: background-color;
+    -webkit-transition: background-color;
+    transition-duration: .25s;
+    display: inline-block;
+    font-weight: bold;
+}
+
+.hivemq-cloud-btn:hover {
+    color: #ffc000;
+    background-color: #333;
+}
+
+.hivemq-cloud-title h3 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0 0 0.25rem;
+    line-height: 1;
+}
+
+.hivemq-cloud-title p {
+    font-size: 1rem;
+    color: #444;
+    margin: 0;
+    line-height: 1;
+}
+
+@media only screen and (max-width: 700px) {
+    .hivemq-cloud-container {
+        display: grid;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: linear-gradient(90deg, #80b6df 0%, #ebf2f9 40%, #ebf2f9 60%, #80b6df 100%);
+        padding: 1rem;
+        gap: 1rem;
+        border-radius: 5px;
+    }
+}
+</style>
+</div>
+<!-- Cloud Banner End -->
 <div id="connection" class="row large-12 columns">
 
     <div class="large-8 columns conniTop">
@@ -40,12 +124,12 @@
                 <form class="custom">
                     <div class="large-5 columns">
                         <label>Host</label>
-                        <input id="urlInput" type="text" value="broker.mqttdashboard.com">
+                        <input id="urlInput" type="text" value="mqtt-dashboard.com">
                     </div>
 
                     <div class="large-1 columns">
                         <label>Port</label>
-                        <input id="portInput" type="text" value="8000"/>
+                        <input id="portInput" type="text" value="8884"/>
                     </div>
 
                     <div class="large-4 columns">
@@ -79,12 +163,13 @@
 
                     <div class="large-1 columns">
                         <label>SSL</label>
-                        <input id="sslInput" type="checkbox"/>
+                        <input id="sslInput" type="checkbox" checked="checked"/>
                     </div>
 
                     <div class="large-2 columns">
                         <label>Clean Session</label>
-                        <input class="checky" id="cleanSessionInput" type="checkbox" checked="checked" disabled="disabled"/>
+                        <input class="checky" id="cleanSessionInput" type="checkbox" checked="checked"
+                               disabled="disabled"/>
                     </div>
 
                     <div class="large-8 columns">
@@ -152,7 +237,8 @@
                                 <input id="publishRetain" type="checkbox">
                             </div>
                             <div class="large-2 columns">
-                                <a class="small button" id="publishButton" onclick="websocketclient.publish($('#publishTopic').val(),$('#publishPayload').val(),parseInt($('#publishQoSInput').val(),10),$('#publishRetain').is(':checked'))">Publish</a>
+                                <a class="small button" id="publishButton"
+                                   onclick="websocketclient.publish($('#publishTopic').val(),$('#publishPayload').val(),parseInt($('#publishQoSInput').val(),10),$('#publishRetain').is(':checked'))">Publish</a>
                             </div>
                         </div>
                         <div class="row">
@@ -273,8 +359,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/4.2.3/js/foundation/foundation.forms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
+<script src="js/jquery.minicolors.min.js"></script>
 <script src="mqttws31.js"></script>
-<script src="encoder.js"></script>
+
 <script src="app.js"></script>
 
 <script>
@@ -292,12 +379,11 @@
 
         $('#clientIdInput').val('clientId-' + randomString(10));
 
-      
 
         $("#addSubButton").fancybox({
             'afterShow': function () {
                 var rndColor = websocketclient.getRandomColor();
-                $("#colorChooser").minicolors('value', rndColor);
+               
             }
         });
 
