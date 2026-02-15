@@ -30,14 +30,14 @@ var websocketclient = {
         var host = 'mqtt-dashboard.com';
         var port = 8884;
         var clientId = $('#clientIdInput').val();
-        var username = ¨¨;
-        var password = ¨¨;
+        var username = "";
+        var password = "";
         var keepAlive = 60;
         var cleanSession = true;
         var lwTopic = ;
         var lwQos = 0;
         var lwRetain = false;
-        var lwMessage =¨¨;
+        var lwMessage ="";
         var ssl = true;
 
         this.client = new Messaging.Client(host, port, clientId);
