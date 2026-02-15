@@ -1,92 +1,63 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicación Web MQTT con HiveMQ</title>
-</head>
-<body>
-    <h1>Aplicación Web MQTT con HiveMQ</h1>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script>
+    // Datos de conexión de tu broker HiveMQ Cloud
+    const brokerUrl = 'wss://mycluster123.mqtt.hivemq.cloud:8000'; // Reemplaza con tu propio Cluster ID
+    const clientId = 'your-client-id'; // Usa un valor único
+    const username = 'your-username'; // Usualmente "public" o tu propio nombre
+    const password = 'your-password'; // Si tu broker lo requiere
 
-    <label for="publishTopic">Tópico de Publicación:</label>
-    <input type="text" id="publishTopic" placeholder="Ejemplo: test/topic">
-    <br><br>
+    // Conectar al broker de HiveMQ
+    const client = mqtt.connect(brokerUrl, {
+        clientId: clientId,
+        username: username,
+        password: password
+    });
 
-    <label for="subscribeTopic">Tópico de Suscripción:</label>
-    <input type="text" id="subscribeTopic" placeholder="Ejemplo: test/topic">
-    <br><br>
+    client.on('connect', function () {
+        console.log('Conectado al broker de HiveMQ');
 
-    <label for="message">Mensaje:</label>
-    <textarea id="message" placeholder="Escribe tu mensaje"></textarea>
-    <br><br>
-
-    <button id="sendBtn">Enviar</button>
-
-    <h3>Mensajes Recibidos:</h3>
-    <div id="receivedMessages"></div>
-
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-    <script>
-        // Datos de conexión de tu broker HiveMQ Cloud
-        const brokerUrl = 'wss://<tu-cluster-id>.mqtt.hivemq.cloud:8000';
-        const clientId = 'your-client-id'; // Usar un valor único
-        const username = 'your-username'; // Usualmente "public" o tu propio nombre
-        const password = 'your-password'; // Si el broker lo requiere
-
-        // Conectar al broker de HiveMQ
-        const client = mqtt.connect(brokerUrl, {
-            clientId: clientId,
-            username: username,
-            password: password
-        });
-
-        client.on('connect', function () {
-            console.log('Conectado al broker de HiveMQ');
-
-            // Suscribirse a un tópico por defecto o el ingresado por el usuario
-            const defaultSubscribeTopic = document.getElementById('subscribeTopic').value || 'test/topic';
-            client.subscribe(defaultSubscribeTopic, function (err) {
-                if (!err) {
-                    console.log('Suscrito al tópico: ' + defaultSubscribeTopic);
-                }
-            });
-        });
-
-        // Enviar mensajes al broker
-        document.getElementById('sendBtn').onclick = function () {
-            const message = document.getElementById('message').value;
-            const publishTopic = document.getElementById('publishTopic').value || 'test/topic'; // Tópico por defecto si no se ingresa uno
-
-            if (message && publishTopic) {
-                client.publish(publishTopic, message); // Publicar en el tópico
-                console.log(`Mensaje enviado al tópico ${publishTopic}: ${message}`);
+        // Suscribirse a un tópico por defecto o el ingresado por el usuario
+        const defaultSubscribeTopic = document.getElementById('subscribeTopic').value || 'test/topic';
+        client.subscribe(defaultSubscribeTopic, function (err) {
+            if (!err) {
+                console.log('Suscrito al tópico: ' + defaultSubscribeTopic);
             }
-        };
-
-        // Recibir mensajes del tópico suscrito
-        client.on('message', function (topic, message) {
-            console.log(`Nuevo mensaje en el tópico ${topic}: ${message.toString()}`);
-            const receivedMessages = document.getElementById('receivedMessages');
-            const newMessage = document.createElement('div');
-            newMessage.textContent = `Tópico: ${topic} - Mensaje: ${message.toString()}`;
-            receivedMessages.appendChild(newMessage);
         });
+    });
 
-        // Permitir actualizar suscripciones cuando el usuario cambia el tópico
-        document.getElementById('subscribeTopic').addEventListener('input', function () {
-            const newSubscribeTopic = this.value;
-            if (client.connected) {
-                // Desconectar la suscripción anterior y suscribirse al nuevo tópico
-                client.unsubscribe('*', function () {
-                    console.log('Desuscrito de todos los tópicos');
-                    client.subscribe(newSubscribeTopic, function (err) {
-                        if (!err) {
-                            console.log('Suscrito al nuevo tópico: ' + newSubscribeTopic);
-                        }
-                    });
+    // Enviar mensajes al broker
+    document.getElementById('sendBtn').onclick = function () {
+        const message = document.getElementById('message').value;
+        const publishTopic = document.getElementById('publishTopic').value || 'test/topic'; // Tópico por defecto si no se ingresa uno
+
+        if (message && publishTopic) {
+            client.publish(publishTopic, message); // Publicar en el tópico
+            console.log(`Mensaje enviado al tópico ${publishTopic}: ${message}`);
+        }
+    };
+
+    // Recibir mensajes del tópico suscrito
+    client.on('message', function (topic, message) {
+        console.log(`Nuevo mensaje en el tópico ${topic}: ${message.toString()}`);
+        const receivedMessages = document.getElementById('receivedMessages');
+        const newMessage = document.createElement('div');
+        newMessage.textContent = `Tópico: ${topic} - Mensaje: ${message.toString()}`;
+        receivedMessages.appendChild(newMessage);
+    });
+
+    // Permitir actualizar suscripciones cuando el usuario cambia el tópico
+    document.getElementById('subscribeTopic').addEventListener('input', function () {
+        const newSubscribeTopic = this.value;
+        if (client.connected) {
+            // Desconectar la suscripción anterior y suscribirse al nuevo tópico
+            client.unsubscribe('*', function () {
+                console.log('Desuscrito de todos los tópicos');
+                client.subscribe(newSubscribeTopic, function (err) {
+                    if (!err) {
+                        console.log('Suscrito al nuevo tópico: ' + newSubscribeTopic);
+                    }
                 });
-            }
-        });
-    </script>
-</body>
-</html>
+            });
+        }
+    });
+</script>
