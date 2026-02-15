@@ -73,12 +73,9 @@ var websocketclient = {
     'onConnect': function () {
         websocketclient.connected = true;
         console.log("connected");
-        var body = $('body').addClass('connected').removeClass('notconnected').removeClass('connectionbroke');
+        
 
-        websocketclient.render.hide('conni');
-        websocketclient.render.show('publish');
-        websocketclient.render.show('sub');
-        websocketclient.render.show('messages');
+        
     },
 
     'onFail': function (message) {
@@ -92,11 +89,6 @@ var websocketclient = {
         if (responseObject.errorCode !== 0) {
             console.log("onConnectionLost:" + responseObject.errorMessage);
         }
-        $('body.connected').removeClass('connected').addClass('notconnected').addClass('connectionbroke');
-        websocketclient.render.show('conni');
-        websocketclient.render.hide('publish');
-        websocketclient.render.hide('sub');
-        websocketclient.render.hide('messages');
 
         //Cleanup messages
         websocketclient.messages = [];
@@ -104,7 +96,6 @@ var websocketclient = {
 
         //Cleanup subscriptions
         websocketclient.subscriptions = [];
-        websocketclient.render.clearSubscriptions();
     },
 
     'onMessageArrived': function (message) {
@@ -123,8 +114,6 @@ var websocketclient = {
         };
 
         console.log(messageObj);
-        messageObj.id = websocketclient.render.message(messageObj);
-        websocketclient.messages.push(messageObj);
     },
 
     'disconnect': function () {
@@ -148,12 +137,10 @@ var websocketclient = {
     'subscribe': function (topic, qosNr, color) {
 
         if (!websocketclient.connected) {
-            websocketclient.render.showError("Not connected");
             return false;
         }
 
         if (topic.length < 1) {
-            websocketclient.render.showError("Topic cannot be empty");
             return false;
         }
 
@@ -282,18 +269,7 @@ var websocketclient = {
 
         'subscription': function (subscription) {
             var largest = websocketclient.lastSubId++;
-            $("#innerEdit").append(
-                '<li class="subLine" id="sub' + largest + '">' +
-                    '   <div class="row large-12 subs' + largest + '" style="border-left: solid 10px #' + subscription.color + '; background-color: #ffffff">' +
-                    '       <div class="large-12 columns subText">' +
-                    '           <div class="large-1 columns right closer">' +
-                    '              <a href="#" onclick="websocketclient.deleteSubscription(' + largest + '); return false;">x</a>' +
-                    '           </div>' +
-                    '           <div class="qos">Qos: ' + subscription.qos + '</div>' +
-                    '           <div class="topic truncate" id="topic' + largest + '" title="' + Encoder.htmlEncode(subscription.topic, 0) + '">' + Encoder.htmlEncode(subscription.topic) + '</div>' +
-                    '       </div>' +
-                    '   </div>' +
-                    '</li>');
+           
             return largest;
         },
 
