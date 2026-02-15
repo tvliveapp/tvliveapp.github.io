@@ -11,19 +11,20 @@
     <!-- Campos para configurar los datos de conexión -->
     <h3>Datos de Conexión MQTT</h3>
     <label for="brokerUrl">URL del Broker:</label>
-    <input type="text" id="brokerUrl" value="wss://<tu-cluster-id>.mqtt.hivemq.cloud:443" placeholder="Ejemplo: wss://<tu-cluster-id>.mqtt.hivemq.cloud:443">
+    <input type="text" id="brokerUrl" value="wss://broker.hivemq.com:8000" placeholder="Ejemplo: wss://broker.hivemq.com:8000">
     <br><br>
 
     <label for="clientId">Client ID:</label>
     <input type="text" id="clientId" value="your-client-id" placeholder="Ejemplo: client-1">
     <br><br>
 
+    <!-- Los campos de Usuario y Contraseña se dejan vacíos ya que no se requieren -->
     <label for="username">Username:</label>
-    <input type="text" id="username" value="public" placeholder="Ejemplo: public">
+    <input type="text" id="username" value="" placeholder="Deja vacío si no se requiere">
     <br><br>
 
     <label for="password">Password:</label>
-    <input type="password" id="password" value="your-password" placeholder="Ejemplo: 12345">
+    <input type="password" id="password" value="" placeholder="Deja vacío si no se requiere">
     <br><br>
 
     <!-- Campos para los tópicos y mensajes -->
@@ -63,15 +64,15 @@
         function connectToBroker() {
             const { brokerUrl, clientId, username, password } = getConnectionData();
 
-            // Conectar al broker de HiveMQ Cloud
+            // Conectar al broker de HiveMQ (sin usuario ni contraseña)
             client = mqtt.connect(brokerUrl, {
-                clientId: clientId,
-                username: username,
-                password: password
+                clientId: clientId,  // Client ID único
+                username: username,  // Deja vacío si no se requiere
+                password: password   // Deja vacío si no se requiere
             });
 
             client.on('connect', function () {
-                console.log('Conectado al broker de HiveMQ Cloud');
+                console.log('Conectado al broker de HiveMQ');
                 document.getElementById('sendBtn').disabled = false; // Habilitar el botón de "Enviar" después de conectar
 
                 // Suscribirse al tópico de suscripción
