@@ -1,138 +1,133 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicación Web MQTT con SSL</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Asegúrate de tener jQuery -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="MQTT WebSocket Client">
+    <title>MQTT WebSocket Client</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/4.2.3/css/foundation.min.css">
 </head>
-<body>
-    <h1>Aplicación Web MQTT</h1>
+<body class="notconnected">
+    <div id="header">
+        <h1>MQTT WebSocket Client</h1>
+    </div>
 
-    <!-- Campos para configurar los datos de conexión -->
-    <h3>Datos de Conexión MQTT</h3>
-    <label for="brokerUrl">URL del Broker:</label>
-    <input type="text" id="brokerUrl" value="broker.mqttdashboard.com" placeholder="Ejemplo: broker.mqttdashboard.com">
-    <br><br>
+    <!-- Formulario de conexión -->
+    <div id="connection">
+        <label>Host</label>
+        <input id="urlInput" type="text" value="broker.mqttdashboard.com" />
 
-    <label for="port">Puerto:</label>
-    <input type="number" id="port" value="8884" placeholder="Ejemplo: 8884">
-    <br><br>
+        <label>Port</label>
+        <input id="portInput" type="text" value="8000" />
 
-    <!-- Checkbox para activar SSL -->
-    <label for="sslInput">Usar SSL:</label>
-    <input type="checkbox" id="sslInput"> Activar SSL
-    <br><br>
+        <label>Client ID</label>
+        <input id="clientIdInput" type="text" value="clientId-1" />
 
-    <label for="clientId">Client ID:</label>
-    <input type="text" id="clientId" value="your-client-id" placeholder="Ejemplo: client-1">
-    <br><br>
+        <button id="connectButton" onclick="connect()">Connect</button>
+        <button id="disconnectButton" onclick="disconnect()" disabled>Disconnect</button>
+    </div>
 
-    <!-- Los campos de Usuario y Contraseña se dejan vacíos ya que no se requieren -->
-    <label for="username">Username:</label>
-    <input type="text" id="username" value="" placeholder="Deja vacío si no se requiere">
-    <br><br>
+    <!-- Formulario para publicar mensajes -->
+    <div id="publish">
+        <label>Topic</label>
+        <input id="publishTopic" type="text" value="test/topic" />
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" value="" placeholder="Deja vacío si no se requiere">
-    <br><br>
+        <label>Message</label>
+        <textarea id="publishMessage"></textarea>
 
-    <!-- Campos para los tópicos y mensajes -->
-    <label for="publishTopic">Tópico de Publicación:</label>
-    <input type="text" id="publishTopic" value="test/topic" placeholder="Ejemplo: test/topic">
-    <br><br>
+        <button onclick="publish()">Publish</button>
+    </div>
 
-    <label for="subscribeTopic">Tópico de Suscripción:</label>
-    <input type="text" id="subscribeTopic" value="test/topic" placeholder="Ejemplo: test/topic">
-    <br><br>
+    <!-- Mensajes recibidos -->
+    <div id="messages">
+        <h3>Received Messages</h3>
+        <ul id="messageList"></ul>
+    </div>
 
-    <label for="message">Mensaje:</label>
-    <textarea id="message" placeholder="Escribe tu mensaje"></textarea>
-    <br><br>
-
-    <button id="sendBtn" disabled>Enviar</button> <!-- Botón de enviar (deshabilitado inicialmente) -->
-    <button id="connectBtn">Conectar</button> <!-- Botón de conectar -->
-    
-    <h3>Mensajes Recibidos:</h3>
-    <div id="receivedMessages"></div>
-
-    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqttws31/1.0.1/mqttws31.min.js"></script>
     <script>
-        let client;
+        var client;
 
-        // Función para obtener los datos de conexión desde los campos de la interfaz
-        function getConnectionData() {
-            const ssl = $('#sslInput').is(':checked'); // Verifica si el checkbox está marcado
-            const protocol = ssl ? 'wss' : 'ws'; // Si SSL está activado, usa wss (WebSocket seguro)
-            const brokerUrl = $('#brokerUrl').val();
-            const port = $('#port').val();
-            const clientId = $('#clientId').val();
-            const username = $('#username').val();
-            const password = $('#password').val();
-            return {
-                brokerUrl: `${protocol}://${brokerUrl}:${port}`, // Crear la URL con el protocolo correcto
-                clientId: clientId,
-                username: username,
-                password: password
+        // Función para conectarse al broker MQTT
+        function connect() {
+            var host = document.getElementById('urlInput').value;
+            var port = parseInt(document.getElementById('portInput').value, 10);
+            var clientId = document.getElementById('clientIdInput').value;
+
+            // Crear cliente MQTT usando WebSockets
+            client = new Paho.MQTT.Client(host, port, clientId);
+            client.onConnectionLost = onConnectionLost;
+            client.onMessageArrived = onMessageArrived;
+
+            // Opciones de conexión
+            var options = {
+                onSuccess: onConnect,
+                onFailure: onFail
             };
-        }
-
-        // Función para conectar al broker MQTT
-        function connectToBroker() {
-            const { brokerUrl, clientId, username, password } = getConnectionData();
 
             // Conectar al broker
-            client = mqtt.connect(brokerUrl, {
-                clientId: clientId,
-                username: username,
-                password: password
-            });
+            client.connect(options);
 
-            client.on('connect', function () {
-                console.log('Conectado al broker');
-                document.getElementById('sendBtn').disabled = false; // Habilitar el botón de "Enviar" después de conectar
-
-                // Suscribirse al tópico de suscripción
-                const subscribeTopic = document.getElementById('subscribeTopic').value || 'test/topic';
-                client.subscribe(subscribeTopic, function (err) {
-                    if (!err) {
-                        console.log('Suscrito al tópico: ' + subscribeTopic);
-                    }
-                });
-            });
-
-            client.on('error', function (err) {
-                console.error('Error de conexión:', err);
-                alert('Error de conexión: ' + err.message);
-            });
-
-            // Recibir mensajes del tópico suscrito
-            client.on('message', function (topic, message) {
-                console.log(`Nuevo mensaje en el tópico ${topic}: ${message.toString()}`);
-                const receivedMessages = document.getElementById('receivedMessages');
-                const newMessage = document.createElement('div');
-                newMessage.textContent = `Tópico: ${topic} - Mensaje: ${message.toString()}`;
-                receivedMessages.appendChild(newMessage);
-            });
+            // Deshabilitar botón de conectar y habilitar botón de desconectar
+            document.getElementById('connectButton').disabled = true;
+            document.getElementById('disconnectButton').disabled = false;
         }
 
-        // Enviar mensajes al broker
-        document.getElementById('sendBtn').onclick = function () {
-            const message = document.getElementById('message').value;
-            const publishTopic = document.getElementById('publishTopic').value || 'test/topic'; // Tópico por defecto si no se ingresa uno
+        // Función cuando la conexión es exitosa
+        function onConnect() {
+            console.log("Connected successfully!");
 
-            if (message && publishTopic && client) {
-                client.publish(publishTopic, message); // Publicar en el tópico
-                console.log(`Mensaje enviado al tópico ${publishTopic}: ${message}`);
+            // Ocultar formulario de conexión y mostrar formulario de publicación
+            document.getElementById('connection').style.display = 'none';
+            document.getElementById('publish').style.display = 'block';
+
+            // Suscribirse a un tópico para recibir mensajes
+            client.subscribe("test/topic", { qos: 0 });
+        }
+
+        // Función cuando la conexión falla
+        function onFail(message) {
+            console.log("Connection failed: " + message.errorMessage);
+            alert("Error: " + message.errorMessage);
+            document.getElementById('connectButton').disabled = false;
+        }
+
+        // Función cuando se pierde la conexión
+        function onConnectionLost(responseObject) {
+            if (responseObject.errorCode !== 0) {
+                console.log("Connection lost: " + responseObject.errorMessage);
             }
-        };
+            document.getElementById('connection').style.display = 'block';
+            document.getElementById('publish').style.display = 'none';
+            document.getElementById('disconnectButton').disabled = true;
+            document.getElementById('connectButton').disabled = false;
+        }
 
-        // Conectar al broker cuando el usuario haga clic en "Conectar"
-        document.getElementById('connectBtn').onclick = function () {
-            connectToBroker();
-            this.disabled = true; // Deshabilitar el botón de "Conectar" después de hacer clic
-            alert('Intentando conectar al broker...');
-        };
+        // Función cuando llega un mensaje
+        function onMessageArrived(message) {
+            console.log("Message arrived: " + message.payloadString);
+            var messageList = document.getElementById('messageList');
+            var li = document.createElement('li');
+            li.textContent = "Topic: " + message.destinationName + ", Message: " + message.payloadString;
+            messageList.appendChild(li);
+        }
+
+        // Función para desconectar
+        function disconnect() {
+            client.disconnect();
+            document.getElementById('disconnectButton').disabled = true;
+            document.getElementById('connectButton').disabled = false;
+        }
+
+        // Función para publicar un mensaje
+        function publish() {
+            var topic = document.getElementById('publishTopic').value;
+            var message = document.getElementById('publishMessage').value;
+            var mqttMessage = new Paho.MQTT.Message(message);
+            mqttMessage.destinationName = topic;
+            client.send(mqttMessage);
+            console.log("Message published: " + message);
+        }
     </script>
 </body>
 </html>
