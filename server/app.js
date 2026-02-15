@@ -82,7 +82,7 @@ var websocketclient = {
     'onConnect': function () {
         websocketclient.connected = true;
         console.log("connected");
-        
+        websocketclient.subscribe("server11",0,"");
 
         
     },
