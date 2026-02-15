@@ -24,27 +24,21 @@ var websocketclient = {
     'messages': [],
     'connected': false,
 
-    'prefill': function () {
-        let parameters = new URLSearchParams(window.location.search)
-        if (parameters.get('username') != null) {$('#userInput').val(parameters.get('username'))} ;
-        if (parameters.get('host') != null) {$('#urlInput').val(parameters.get('host'))};
-        if (parameters.get('port') != null) {$('#portInput').val(parameters.get('port'))};
-        if (parameters.get('host') != null) {$('#sslInput').click()};
-    },
+   
 
     'connect': function () {
-        var host = $('#urlInput').val();
-        var port = parseInt($('#portInput').val(), 10);
+        var host = 'mqtt-dashboard.com';
+        var port = 8884;
         var clientId = $('#clientIdInput').val();
-        var username = $('#userInput').val();
-        var password = $('#pwInput').val();
-        var keepAlive = parseInt($('#keepAliveInput').val());
-        var cleanSession = $('#cleanSessionInput').is(':checked');
-        var lwTopic = $('#lwTopicInput').val();
-        var lwQos = parseInt($('#lwQosInput').val());
-        var lwRetain = $('#LWRInput').is(':checked');
-        var lwMessage = $('#LWMInput').val();
-        var ssl = $('#sslInput').is(':checked');
+        var username = ¨¨;
+        var password = ¨¨;
+        var keepAlive = 60;
+        var cleanSession = true;
+        var lwTopic = ;
+        var lwQos = 0;
+        var lwRetain = false;
+        var lwMessage =¨¨;
+        var ssl = true;
 
         this.client = new Messaging.Client(host, port, clientId);
         this.client.onConnectionLost = this.onConnectionLost;
