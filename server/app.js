@@ -342,4 +342,4 @@ var websocketclient = {
     }
 };
 
-websocketclient.prefill()
+websocketclient.connect();
