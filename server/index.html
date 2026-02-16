@@ -4,6 +4,19 @@
 <!--[if gt IE 8]><!-->
 <html class="no-js" lang="en"> <!--<![endif]-->
 <head>
+    <style>
+    #consoleOutput {
+      font-family: monospace;
+      background: #111;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .log { color: #ccc; }
+    .info { color: #4da6ff; }
+    .warn { color: #ffae42; }
+    .error { color: #ff4d4d; }
+  </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Try HiveMQ MQTT browser client – a websocket client that you can use to experiment with publishing and subscribing MQTT messages over port 8000">
@@ -58,7 +71,43 @@
 
         </div>
     </div>
+<h2 id="consoleOutput">🖥 Consola:</h2>
 
+<script>
+  const output = document.getElementById("consoleOutput");
+
+  function write(type, args) {
+    const message = Array.from(args).map(arg =>
+      typeof arg === "object"
+        ? JSON.stringify(arg, null, 2)
+        : arg
+    ).join(" ");
+
+    const line = document.createElement("div");
+    line.className = type;
+    line.textContent = `[${type.toUpperCase()}] ${message}`;
+    output.appendChild(line);
+  }
+
+  ["log", "info", "warn", "error"].forEach(type => {
+    const original = console[type];
+    console[type] = function(...args) {
+      original.apply(console, args);
+      write(type, args);
+    };
+  });
+
+  // Capturar errores globales
+  window.onerror = function(message, source, lineno, colno, error) {
+    console.error(message);
+  };
+
+  // PRUEBAS
+  console.log("Mensaje normal");
+  console.info("Información");
+  console.warn("Advertencia");
+  console.error("Error crítico");
+</script>
     
 </div>
 </div>
