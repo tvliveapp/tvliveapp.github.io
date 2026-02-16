@@ -124,6 +124,7 @@ var websocketclient = {
         };
 
         console.log(messageObj);
+        document.getElementById('msgBox').innerText = message.payloadString+"\n";
         try {
           // Code that might throw an error (exception)
             window.AppInventor.setWebViewString("mqtt:"+messageObj.payload);
