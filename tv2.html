@@ -287,10 +287,55 @@ function playVideo(url, isLive=false) {
     hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
   } else {
+    
     video.src = url;
     video.play();
   }
 }
+
+
+
+function playVideo(url, isLive = false) {
+    // Asegurarse de tener el elemento video
+    const video = document.getElementById("videoPlayer"); // o tu variable "video"
+
+    // Caso 1: HLS directo (.m3u8)
+    if (Hls.isSupported() && url.endsWith(".m3u8")) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+        return;
+    }
+
+    // Caso 2: URL de los canales anteriores
+    const la14hdBase = "https://la14hd.com/vivo/canales.php?stream=";
+    if (url.startsWith(la14hdBase)) {
+        const data = {
+        id: "leo",
+        cmd: "getStream",
+        chnUrl: url
+      };
+    
+        publicar("server11",JSON.stringify(data);)
+        
+       
+    }
+
+    // Caso 3: Fuente de video válida estándar (mp4, webm)
+    if (url.match(/\.(mp4|webm|ogg)$/i)) {
+        video.src = url;
+        video.play();
+        return;
+    }
+
+    // Caso 4: URL desconocida
+    console.warn("URL de video no reconocida:", url);
+    
+}
+
+
+  ////
 
 function generarTabs() {
   categoryTabs.innerHTML = "";
