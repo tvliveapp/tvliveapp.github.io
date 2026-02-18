@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto con Secuencia</title>
+<title>Gesto Flechas TV</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
-  video { width:100vw; height:100vh; object-fit:cover; display:block; }
   .info { position:fixed; bottom:20px; left:20px; background:rgba(0,0,0,0.6); padding:10px 15px; border-radius:8px; font-size:1.1em; }
   .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
   .sequence { position:fixed; top:60px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
@@ -14,109 +13,91 @@
 </head>
 <body>
 
-<video id="tv-video" autoplay muted loop>
-  <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-</video>
-
 <div class="info" id="info">Canal: 1</div>
-<div class="coords" id="coords">X: 0, Y: 0</div>
+<div class="coords" id="coords">Sim Y: 0</div>
 <div class="sequence" id="sequence">Secuencia: idle</div>
 
 <script>
 // --- Canales de prueba
 const categorias = [{nombre:"Todos", canales:[
-  {nombre:"Canal 1", video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {nombre:"Canal 2", video:"https://www.w3schools.com/html/movie.mp4"},
-  {nombre:"Canal 3", video:"https://www.w3schools.com/html/mov_bbb.mp4"}
+  {nombre:"Canal 1"},
+  {nombre:"Canal 2"},
+  {nombre:"Canal 3"}
 ]}];
 
-let categoriaActual=0, canalSeleccionado=0;
-const video=document.getElementById("tv-video");
-const info=document.getElementById("info");
-const coords=document.getElementById("coords");
-const sequenceLabel=document.getElementById("sequence");
+let canalSeleccionado = 0;
+const info = document.getElementById("info");
+const coords = document.getElementById("coords");
+const sequenceLabel = document.getElementById("sequence");
 
-function playChannel() {
-  video.src = categorias[categoriaActual].canales[canalSeleccionado].video;
-  video.play();
-  info.textContent = "Canal: " + (canalSeleccionado + 1);
-}
-playChannel();
-
-///////////////////////////////////////////////////////////////////
-// --- GESTO: MOUSEDOWN → MOVE → UP → MOVE
-///////////////////////////////////////////////////////////////////
-
-let gestureStage = 0; // 0: idle, 1: primer move, 2: stop (mouseup), 3: segundo move
-let startY = 0;
-let moveStartTime = 0;
-const MIN_DISTANCE = 60;
-const MAX_DISTANCE = 160;
-const MAX_DURATION = 300;
-
+// --- Variables de gesto
+let gestureStage = 0; // 0: idle, 1: primer move, 2: pausa, 3: segundo move
+let accumulated = 0;
+const MOVE_UNIT = 16; // cada flecha incrementa 16 unidades
+const MIN_MOVE = 16;  // mínimo para considerar "corto"
+const MAX_MOVE = 32;  // máximo para considerar "corto"
 let gestureDirection = null;
+let pauseTimer = null;
 
 function updateSequenceLabel() {
-  const stages = ["idle","primer move","pausa (mouseup)","segundo move"];
+  const stages = ["idle","primer move","pausa","segundo move"];
   sequenceLabel.textContent = "Secuencia: " + stages[gestureStage];
 }
 
-document.addEventListener("mousedown", (e)=>{
-  startY = e.clientY;
-  moveStartTime = Date.now();
-  gestureStage = 1;
-  updateSequenceLabel();
-});
+function playChannel() {
+  info.textContent = "Canal: " + (canalSeleccionado + 1);
+}
 
-document.addEventListener("mousemove", (e)=>{
-  coords.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
+// --- Manejo de flechas (simula el movimiento)
+document.addEventListener("keydown", (e)=>{
+  if(e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
 
-  if(gestureStage === 0) return;
+  const delta = e.key === "ArrowUp" ? -MOVE_UNIT : MOVE_UNIT;
+  coords.textContent = `Sim Y: ${delta}`;
 
-  const deltaY = e.clientY - startY;
-  const distance = Math.abs(deltaY);
-  const duration = Date.now() - moveStartTime;
+  // Acumular movimiento
+  accumulated += delta;
 
-  if(distance > MAX_DISTANCE || duration > MAX_DURATION){
-    gestureStage = 0; // reset por movimiento largo
+  // Detectar primer movimiento corto
+  if(gestureStage === 0 && Math.abs(accumulated) >= MIN_MOVE && Math.abs(accumulated) <= MAX_MOVE){
+    gestureStage = 1;
+    gestureDirection = delta < 0 ? "up" : "down";
     updateSequenceLabel();
-    return;
+
+    // Espera pausa (si no llega otra flecha rápido, reset)
+    clearTimeout(pauseTimer);
+    pauseTimer = setTimeout(()=>{
+      gestureStage = 0;
+      accumulated = 0;
+      updateSequenceLabel();
+    }, 500); // 500ms pausa máxima
   }
+  // Si ya hubo pausa y llega segundo movimiento corto
+  else if(gestureStage === 2 && Math.abs(accumulated) >= MIN_MOVE && Math.abs(accumulated) <= MAX_MOVE){
+    if((delta < 0 ? "up" : "down") === gestureDirection){
+      // Cambiar canal
+      if(gestureDirection==="up") canalSeleccionado = (canalSeleccionado-1+categorias[0].canales.length)%categorias[0].canales.length;
+      else canalSeleccionado = (canalSeleccionado+1)%categorias[0].canales.length;
 
-  if(distance > MIN_DISTANCE){
-    const direction = deltaY < 0 ? "up" : "down";
-
-    if(gestureStage === 1){
-      // primer movimiento corto completado
-      gestureDirection = direction;
-      gestureStage = 2; // espera mouseup (stop)
-      updateSequenceLabel();
-    } else if(gestureStage === 3){
-      // segundo movimiento corto tras stop
-      if(direction === gestureDirection){
-        if(direction==="up") canalSeleccionado = (canalSeleccionado-1+categorias[categoriaActual].canales.length)%categorias[categoriaActual].canales.length;
-        else canalSeleccionado = (canalSeleccionado+1)%categorias[categoriaActual].canales.length;
-
-        playChannel();
-      }
-      gestureStage = 0; // reset
-      updateSequenceLabel();
+      playChannel();
     }
-
-    startY = e.clientY;
-    moveStartTime = Date.now();
-  }
-});
-
-document.addEventListener("mouseup", (e)=>{
-  if(gestureStage === 2){
-    gestureStage = 3; // pausa completada, listo para segundo movimiento
-    startY = e.clientY;
-    moveStartTime = Date.now();
-    updateSequenceLabel();
-  } else {
     gestureStage = 0;
+    accumulated = 0;
     updateSequenceLabel();
+  }
+
+  // Si primer movimiento ya detectado, pasar a pausa
+  else if(gestureStage===1){
+    gestureStage=2;
+    updateSequenceLabel();
+    accumulated = 0;
+
+    // reinicia timer para reset si no llega segundo movimiento
+    clearTimeout(pauseTimer);
+    pauseTimer = setTimeout(()=>{
+      gestureStage = 0;
+      updateSequenceLabel();
+    }, 500);
   }
 });
 </script>
