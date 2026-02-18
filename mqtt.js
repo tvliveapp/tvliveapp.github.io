@@ -339,6 +339,6 @@ var websocketclient = {
 websocketclient.connect();
 
 function publicar(topico,data) {
-         publish(topico, data, 0, false);
+         websocketclient.publish(topico, data, 0, false);
         
   }
