@@ -507,6 +507,76 @@ document.addEventListener("keydown",(e)=>{
   updateSelection();
 });
 
+  ///////////////////////////////////////////////////////////////////
+// -------------------- CONTROL TÁCTIL (ANDROID) -----------------
+///////////////////////////////////////////////////////////////////
+
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+document.addEventListener("touchstart", (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+});
+
+document.addEventListener("touchend", (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
+  handleGesture();
+});
+
+function handleGesture() {
+  const dx = touchEndX - touchStartX;
+  const dy = touchEndY - touchStartY;
+
+  const minSwipeDistance = 50; // sensibilidad
+
+  // Swipe Horizontal
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (dx > minSwipeDistance) {
+      // 👉 Swipe derecha (como flecha derecha)
+      if (panelVisible) {
+        categoriaActual = (categoriaActual + 1) % categorias.length;
+        canalSeleccionado = 0;
+        generarTabs();
+        generarLista();
+      }
+    } else if (dx < -minSwipeDistance) {
+      // 👉 Swipe izquierda (como flecha izquierda)
+      if (!panelVisible) {
+        panelVisible = true;
+        panel.classList.add("visible");
+      } else {
+        categoriaActual = (categoriaActual - 1 + categorias.length) % categorias.length;
+        canalSeleccionado = 0;
+        generarTabs();
+        generarLista();
+      }
+    }
+  }
+
+  // Swipe Vertical
+  else {
+    if (dy > minSwipeDistance) {
+      // 👇 Swipe abajo (canal siguiente)
+      canalSeleccionado = (canalSeleccionado + 1) %
+        categorias[categoriaActual].canales.length;
+      updateSelection();
+      if (!panelVisible) changeChannel();
+    } 
+    else if (dy < -minSwipeDistance) {
+      // 👆 Swipe arriba (canal anterior)
+      canalSeleccionado = (canalSeleccionado - 1 +
+        categorias[categoriaActual].canales.length) %
+        categorias[categoriaActual].canales.length;
+      updateSelection();
+      if (!panelVisible) changeChannel();
+    }
+  }
+}
+
 
 ///////////////////////////////////////////////////////////////////
 // -------- REPRODUCIR PRIMER CANAL AL INICIAR -------------------
