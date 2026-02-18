@@ -516,6 +516,19 @@ changeChannel();
 vid="https://ozufk.envivotv.live/ecdf/tracks-v1a1/mono.m3u8?remote=186.69.141.34&token=fd3fab079ae4c8ffa153a77d663f28ad8a54ac25-447440262ee5a9ca9df57b3fc242bc3f-1763088436-1763077636";
 playVideo(vid,true);
 
+
+
+////mqtt message received
+ function  mqttMessage(payloadString){
+    data= JSON.parse(payloadString);
+   if(data.cmd=="playStream"){
+       play(data.streamUrl);
+       return;
+   }
+   
+ }
+
+  
 </script>
 </body>
 </html>
