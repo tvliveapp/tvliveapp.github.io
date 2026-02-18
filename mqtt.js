@@ -18,6 +18,31 @@
  */
 
 
+//add <span id="mqtt-status" style="margin-left:10px;color:red;">●</span>
+let mqttIndi=false;
+try{
+        const mqttStatus = document.getElementById('mqtt-status');
+        mqttIndi=true;
+} catch (error) {
+          console.log("sin indicador")
+}
+
+function setMqttConnected() {
+        if(mqttIndi){
+            mqttStatus.textContent = '●';
+            mqttStatus.style.color = 'white'; // o verde si quieres
+        }
+}
+
+function setMqttDisconnected() {
+    if(mqttIndi){
+            mqttStatus.textContent = '●';
+            mqttStatus.style.color = 'red';
+    }
+}
+
+
+
 function randomString(length) {
         var text = "";
         var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -25,6 +50,16 @@ function randomString(length) {
             text += possible.charAt(Math.floor(Math.random() * possible.length));
         return text;
     }
+
+function retryConnect() {
+    setTimeout(() => {
+        if (!websocketclient.connected) {
+            console.log("Intentando reconectar MQTT...");
+            websocketclient.connect();
+        }
+    }, 5000); // reintenta cada 5 segundos
+}
+
 
 var websocketclient = {
     'client': null,
@@ -84,8 +119,8 @@ var websocketclient = {
         websocketclient.connected = true;
     //    document.getElementById('connection-status').innerText = 'Connected';
         console.log("connected");
-        websocketclient.subscribe("server11",0,"");
-
+        //websocketclient.subscribe("server11",0,"");
+        setMqttConnected();
         
     },
 
@@ -93,6 +128,8 @@ var websocketclient = {
         websocketclient.connected = false;
         console.log("error: " + message.errorMessage);
         websocketclient.render.showError('Connect failed: ' + message.errorMessage);
+           setMqttDisconnected();
+            retryConnect();
     },
 
     'onConnectionLost': function (responseObject) {
@@ -107,6 +144,8 @@ var websocketclient = {
 
         //Cleanup subscriptions
         websocketclient.subscriptions = [];
+            setMqttDisconnected();
+            retryConnect();
     },
 
     'onMessageArrived': function (message) {
