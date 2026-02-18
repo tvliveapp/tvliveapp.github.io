@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Incremento corto Y</title>
+<title>Incremento canal</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
   .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
   .increment { position:fixed; top:60px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
+  .channel-change { position:fixed; top:100px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
 </style>
 </head>
 <body>
@@ -18,37 +19,54 @@
 </video>
 
 <div class="coords" id="coords">Y: 0</div>
-<div class="increment" id="increment">Incremento total: 0</div>
+<div class="increment" id="increment">Incremento actual: 0</div>
+<div class="channel-change" id="channelChange">Movimiento canal: 0</div>
 
 <script>
-// --- Variables de coordenadas
-let lastY = null;
-let lastTime = null;
-let totalIncrement = 0;
-
+// --- Configuración
 const MAX_SMALL_INCREMENT = 35; // máximo incremento considerado "pequeño"
-const MAX_INTERVAL = 1000;       // 1 segundo entre movimientos pequeños
+const MAX_INTERVAL = 1000;       // 1 segundo para considerar el gesto
+
+// Variables
+let gestureStartY = null;
+let gestureStartTime = null;
 
 const coords = document.getElementById("coords");
 const incrementLabel = document.getElementById("increment");
+const channelLabel = document.getElementById("channelChange");
 
+// Evento mousemove
 document.addEventListener("mousemove", (e) => {
   const now = Date.now();
   coords.textContent = `Y: ${e.clientY}`;
 
-  if (lastY !== null && lastTime !== null) {
-    const deltaY = e.clientY - lastY;
-    const elapsed = now - lastTime;
-
-    // Solo considerar incrementos pequeños y rápidos
-    if (Math.abs(deltaY) > 0 && Math.abs(deltaY) < MAX_SMALL_INCREMENT && elapsed <= MAX_INTERVAL) {
-      totalIncrement += deltaY;
-      incrementLabel.textContent = `Incremento total: ${totalIncrement}`;
-    }
+  if (gestureStartY === null) {
+    // Primer movimiento de gesto
+    gestureStartY = e.clientY;
+    gestureStartTime = now;
+    incrementLabel.textContent = `Incremento actual: 0`;
+    channelLabel.textContent = `Movimiento canal: 0`;
+    return;
   }
 
-  lastY = e.clientY;
-  lastTime = now;
+  const deltaY = e.clientY - gestureStartY;
+  const elapsed = now - gestureStartTime;
+
+  // Solo considerar incrementos pequeños y dentro del tiempo límite
+  if (Math.abs(deltaY) < MAX_SMALL_INCREMENT && elapsed <= MAX_INTERVAL) {
+    incrementLabel.textContent = `Incremento actual: ${deltaY.toFixed(0)}`;
+
+    // Determinar movimiento de canal
+    if (deltaY >= 10) channelLabel.textContent = `Movimiento canal: +`;
+    else if (deltaY <= -10) channelLabel.textContent = `Movimiento canal: -`;
+    else channelLabel.textContent = `Movimiento canal: 0`;
+  } else {
+    // Resetea el gesto si el movimiento es grande o lento
+    gestureStartY = e.clientY;
+    gestureStartTime = now;
+    incrementLabel.textContent = `Incremento actual: 0`;
+    channelLabel.textContent = `Movimiento canal: 0`;
+  }
 });
 </script>
 </body>
