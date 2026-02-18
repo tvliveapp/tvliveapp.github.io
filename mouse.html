@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto y flechas Samsung TV</title>
+<title>Gesto doble con pausa exacta</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
-  .coords, .increment, .channel-change, .timer, .keycode {
+  .coords, .increment, .channel-change, .timer {
     position:fixed; left:20px; background:rgba(0,0,0,0.6);
     padding:8px 12px; border-radius:6px; font-size:1em;
   }
@@ -15,7 +15,6 @@
   .increment { top:60px; }
   .channel-change { top:100px; }
   .timer { top:140px; }
-  .keycode { top:180px; }
 </style>
 </head>
 <body>
@@ -26,9 +25,8 @@
 
 <div class="coords" id="coords">Y: 0</div>
 <div class="increment" id="increment">Incremento actual: 0</div>
-<div class="channel-change" id="channelChange">Canal actual: 1 Movimiento: 0</div>
+<div class="channel-change" id="channelChange">Canal actual: 1  Movimiento: 0</div>
 <div class="timer" id="timer">Tiempo desde primer gesto: 0s</div>
-<div class="keycode" id="keycode">Tecla presionada: -</div>
 
 <script>
 // --- Canales de prueba
@@ -44,88 +42,79 @@ const coords = document.getElementById("coords");
 const incrementLabel = document.getElementById("increment");
 const channelLabel = document.getElementById("channelChange");
 const timerLabel = document.getElementById("timer");
-const keycodeLabel = document.getElementById("keycode");
 
 function playChannel(movement = 0) {
   video.src = categorias[0].canales[canalSeleccionado].video;
   video.play();
   channelLabel.textContent = `Canal actual: ${canalSeleccionado + 1}  Movimiento: ${movement>0?"+":"-"}${Math.abs(movement)}`;
 }
-playChannel(0);
 
-// --- Configuración del gesto corto con pausa
-const MAX_DISTANCE = 20;  // máximo movimiento válido
-const PAUSE_MIN = 500;    // ms mínimo de pausa
-const PAUSE_MAX = 1000;   // ms máximo de pausa
+// --- Configuración
+const MAX_INCREMENT = 20;    // máximo incremento válido
+const MAX_INTERVAL = 1000;   // ms máximo entre movimientos
 
-let lastGestureTime = 0;
 let gestureStartY = null;
-let gestureDirection = 0; // +1 hacia abajo, -1 hacia arriba
+let firstMoveTime = null;
+let firstMoveDelta = 0;
+let waitingSecond = false;
 
 // Temporizador
 let timerStart = null;
 let timerInterval = null;
 
-// --- Detectar movimiento del mouse
-document.addEventListener("mousemove", (e)=>{
-  const now = Date.now();
+// --- Mousemove
+document.addEventListener("mousemove", e=>{
   coords.textContent = `Y: ${e.clientY}`;
 
   if(gestureStartY === null){
     gestureStartY = e.clientY;
-    incrementLabel.textContent = `Incremento actual: 0`;
     return;
   }
 
-  const deltaY = e.clientY - gestureStartY;
-  const absDeltaY = Math.abs(deltaY);
-  incrementLabel.textContent = `Incremento actual: ${deltaY.toFixed(0)}`;
+  const delta = e.clientY - gestureStartY;
+  incrementLabel.textContent = `Incremento actual: ${delta.toFixed(0)}`;
+  gestureStartY = e.clientY;
 
-  if(absDeltaY > MAX_DISTANCE){
-    gestureStartY = e.clientY;
-    gestureDirection = 0; // resetea dirección
+  if(Math.abs(delta) > MAX_INCREMENT){
+    // movimiento largo: reiniciar
+    firstMoveTime = null;
+    waitingSecond = false;
     return;
   }
 
-  const currentDirection = deltaY < 0 ? -1 : 1; // hacia arriba = -1, abajo = +1
-  const pause = now - lastGestureTime;
+  const now = Date.now();
 
-  if(currentDirection !== gestureDirection){
-    gestureDirection = currentDirection;
-    lastGestureTime = now;
+  if(!waitingSecond){
+    // primer movimiento válido
+    firstMoveTime = now;
+    firstMoveDelta = delta;
+    waitingSecond = true;
 
-    if(!timerStart){
-      timerStart = now;
-      timerInterval = setInterval(()=>{
-        const seconds = Math.floor((Date.now() - timerStart)/1000);
-        timerLabel.textContent = `Tiempo desde primer gesto: ${seconds}s`;
-      }, 1000);
+    // iniciar temporizador
+    timerStart = now;
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(()=>{
+      const seconds = Math.floor((Date.now()-timerStart)/1000);
+      timerLabel.textContent = `Tiempo desde primer gesto: ${seconds}s`;
+    }, 200);
+
+  } else {
+    // segundo movimiento: validar tiempo y misma dirección
+    const elapsed = now - firstMoveTime;
+    if(elapsed <= MAX_INTERVAL && Math.sign(delta) === Math.sign(firstMoveDelta)){
+      // gesto válido → cambiar canal
+      const movement = delta < 0 ? -1 : 1;
+      canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
+      playChannel(movement);
     }
 
-    gestureStartY = e.clientY;
-    return;
-  }
+    // reset
+    waitingSecond = false;
+    firstMoveTime = null;
+    firstMoveDelta = 0;
 
-  if(pause >= PAUSE_MIN && pause <= PAUSE_MAX){
-    const movement = currentDirection;
-    canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
-    playChannel(movement);
-    lastGestureTime = now;
-  }
-
-  gestureStartY = e.clientY;
-});
-
-// --- Detectar flechas (Samsung TV: simular 16 unidades por pulsación)
-document.addEventListener("keydown",(e)=>{
-  let movement = 0;
-  if(e.key === "ArrowUp") movement = -1;
-  else if(e.key === "ArrowDown") movement = 1;
-
-  if(movement !== 0){
-    keycodeLabel.textContent = `Tecla presionada: ${e.key}`;
-    canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
-    playChannel(movement*16); // simula 16 unidades por presión
+    if(timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    timerLabel.textContent = `Tiempo desde primer gesto: 0s`;
   }
 });
 </script>
