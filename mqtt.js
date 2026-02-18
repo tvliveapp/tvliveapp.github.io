@@ -61,7 +61,7 @@ function retryConnect() {
     }, 5000); // reintenta cada 5 segundos
 }
 
-
+let myId=randomString(10);
 var websocketclient = {
     'client': null,
     'lastMessageId': 1,
@@ -75,7 +75,7 @@ var websocketclient = {
     'connect': function () {
         var host = 'mqtt-dashboard.com';
         var port = 8884;
-        var clientId = randomString(10);
+        var clientId = myId;
         var username = "";
         var password = "";
         var keepAlive = 60;
@@ -379,7 +379,7 @@ var websocketclient = {
 websocketclient.connect();
 
 function publicar(topico,data) {
-         data.id=websocketclient.clientId;
+         data.id=myId;
          websocketclient.publish(topico, data, 0, false);
         
   }
