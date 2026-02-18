@@ -428,7 +428,15 @@ function resetInactivityTimer() {
 
 document.addEventListener("keydown",(e)=>{
 
+  //resetInactivityTimer();
+
+   e.preventDefault();   // 🔥 IMPORTANTE en LG
+  e.stopPropagation();  // 🔥 Evita que el cursor se mueva
+
   resetInactivityTimer();
+
+  let key = e.key;      // más compatible
+  let code = e.keyCode || e.which;
   let code = e.keyCode || e.which;
 
   // Números 0–9
@@ -457,6 +465,7 @@ document.addEventListener("keydown",(e)=>{
 
 
   // FLECHAS, ENTER Y RETURN — COMPATIBLE TIZEN
+ /*
   switch(code) {
     case 37: // ←
       if (!panelVisible) {
@@ -503,6 +512,55 @@ document.addEventListener("keydown",(e)=>{
       overlay.classList.add("hidden");
       break;
   }
+*/
+  switch(key) {
+
+  case "ArrowLeft":
+    if (!panelVisible) {
+      panelVisible=true;
+      panel.classList.add("visible");
+    } else {
+      categoriaActual = (categoriaActual - 1 + categorias.length) % categorias.length;
+      canalSeleccionado = 0;
+      generarTabs();
+      generarLista();
+    }
+    break;
+
+  case "ArrowRight":
+    if (panelVisible) {
+      categoriaActual = (categoriaActual + 1) % categorias.length;
+      canalSeleccionado = 0;
+      generarTabs();
+      generarLista();
+    }
+    break;
+
+  case "ArrowUp":
+    canalSeleccionado = (canalSeleccionado - 1 + categorias[categoriaActual].canales.length) %
+                        categorias[categoriaActual].canales.length;
+    updateSelection();
+    if (!panelVisible) changeChannel();
+    break;
+
+  case "ArrowDown":
+    canalSeleccionado = (canalSeleccionado + 1) %
+                        categorias[categoriaActual].canales.length;
+    updateSelection();
+    if (!panelVisible) changeChannel();
+    break;
+
+  case "Enter":
+    changeChannel();
+    break;
+
+  case "Backspace":   // 🔥 LG usa Backspace
+  case "Escape":
+    panelVisible=false;
+    panel.classList.remove("visible");
+    overlay.classList.add("hidden");
+    break;
+}
 
   updateSelection();
 });
