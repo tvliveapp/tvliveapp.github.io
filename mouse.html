@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto doble con intervalo</title>
+<title>Control TV Samsung con Gestos Mejorado</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
@@ -13,7 +13,7 @@
   .increment { top:60px; }
   .channel-change { top:100px; }
   .timer { top:140px; }
-  .indicator { top:180px; width:30px; height:30px; border-radius:50%; background:gray; }
+  .indicator { top:180px; width:30px; height:30px; border-radius:50%; background:gray; transition: background 0.2s, opacity 0.1s; }
 </style>
 </head>
 <body>
@@ -47,14 +47,15 @@ const indicator = document.getElementById("indicator");
 function playChannel(movement = 0) {
   video.src = categorias[0].canales[canalSeleccionado].video;
   video.play();
-  channelLabel.textContent = `Canal actual: ${canalSeleccionado + 1}  Movimiento: ${movement>0?"+":"-"}${Math.abs(movement)}`;
+  const movText = movement > 0 ? "+16" : (movement < 0 ? "-16" : "0");
+  channelLabel.textContent = `Canal actual: ${canalSeleccionado + 1}  Movimiento: ${movText}`;
 }
 
 // --- Configuración
 const MAX_INCREMENT = 20;   // px máximo para movimiento corto
 const MIN_INTERVAL = 500;   // ms mínimo entre primer y segundo
 const MAX_INTERVAL = 1000;  // ms máximo entre primer y segundo
-const RESET_DELAY = 3000;   // ms antes de permitir nuevo gesto
+const RESET_DELAY = 3000;   // ms después de realizar acción
 
 let gestureStartY = null;
 let firstMoveTime = null;
@@ -62,9 +63,9 @@ let firstMoveDelta = 0;
 let waitingSecond = false;
 let gestureLocked = false;
 
-// Temporizador
 let timerStart = null;
 let timerInterval = null;
+let visualInterval = null;
 
 // --- Mousemove
 document.addEventListener("mousemove", e => {
@@ -82,11 +83,8 @@ document.addEventListener("mousemove", e => {
   gestureStartY = e.clientY;
 
   if(Math.abs(delta) > MAX_INCREMENT){
-    // movimiento largo: reiniciar primer gesto
-    firstMoveTime = null;
-    waitingSecond = false;
-    indicator.style.background = "gray";
-    if(timerInterval){ clearInterval(timerInterval); timerInterval=null; timerLabel.textContent="Tiempo desde primer gesto: 0s"; }
+    // movimiento largo → reiniciar primer gesto
+    resetGesture();
     return;
   }
 
@@ -97,9 +95,10 @@ document.addEventListener("mousemove", e => {
     firstMoveTime = now;
     firstMoveDelta = delta;
     waitingSecond = true;
-    indicator.style.background = "orange"; // indica primer movimiento
+    indicator.style.background = "orange"; // primer movimiento
+    indicator.style.opacity = 1;
 
-    // iniciar temporizador
+    // iniciar temporizador de conteo
     timerStart = now;
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(()=>{
@@ -107,38 +106,56 @@ document.addEventListener("mousemove", e => {
       timerLabel.textContent = `Tiempo desde primer gesto: ${seconds}s`;
     }, 100);
 
+    // control visual del cambio naranja → verde → desvanecimiento
+    if(visualInterval) clearInterval(visualInterval);
+    visualInterval = setInterval(()=>{
+      const elapsed = Date.now() - firstMoveTime;
+
+      if(elapsed >= MIN_INTERVAL && elapsed <= MAX_INTERVAL){
+        // cambio a verde a partir del tiempo mínimo
+        indicator.style.background = "green";
+        // desvanecer progresivamente
+        const opacity = 1 - (elapsed - MIN_INTERVAL)/(MAX_INTERVAL - MIN_INTERVAL);
+        indicator.style.opacity = opacity;
+      } else if(elapsed > MAX_INTERVAL){
+        resetGesture();
+      }
+    }, 50);
+
   } else {
     // segundo movimiento: validar intervalo y misma dirección
     const elapsed = now - firstMoveTime;
     if(elapsed >= MIN_INTERVAL && elapsed <= MAX_INTERVAL && Math.sign(delta) === Math.sign(firstMoveDelta)){
-      // gesto válido → cambiar canal
-      const movement = delta < 0 ? -1 : 1;
-      canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
+      // gesto válido → cambiar canal +16/-16
+      const movement = delta < 0 ? -16 : 16;
+      canalSeleccionado = (canalSeleccionado + (movement > 0 ? 1 : -1) + categorias[0].canales.length) % categorias[0].canales.length;
       playChannel(movement);
 
-      indicator.style.background = "green"; // segundo movimiento detectado
+      indicator.style.background = "green";
+      indicator.style.opacity = 1;
 
-      // bloquear nuevos gestos por RESET_DELAY
+      // bloquear gestos por RESET_DELAY
       gestureLocked = true;
       setTimeout(()=>{
         gestureLocked = false;
-        waitingSecond = false;
-        firstMoveTime = null;
-        firstMoveDelta = 0;
-        indicator.style.background = "gray";
-        timerLabel.textContent = "Tiempo desde primer gesto: 0s";
+        resetGesture();
       }, RESET_DELAY);
 
-    } else {
-      // no válido → descartar
-      waitingSecond = false;
-      firstMoveTime = null;
-      firstMoveDelta = 0;
-      indicator.style.background = "gray";
-      if(timerInterval){ clearInterval(timerInterval); timerInterval=null; timerLabel.textContent="Tiempo desde primer gesto: 0s"; }
+    } else if(elapsed > MAX_INTERVAL){
+      resetGesture();
     }
   }
 });
+
+function resetGesture(){
+  waitingSecond = false;
+  firstMoveTime = null;
+  firstMoveDelta = 0;
+  indicator.style.background = "gray";
+  indicator.style.opacity = 1;
+  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; timerLabel.textContent="Tiempo desde primer gesto: 0s"; }
+  if(visualInterval){ clearInterval(visualInterval); visualInterval=null; }
+}
 </script>
 </body>
 </html>
