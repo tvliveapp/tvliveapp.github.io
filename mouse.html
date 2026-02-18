@@ -3,18 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto doble con pausa exacta</title>
+<title>Gesto doble con intervalo</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
-  .coords, .increment, .channel-change, .timer {
-    position:fixed; left:20px; background:rgba(0,0,0,0.6);
-    padding:8px 12px; border-radius:6px; font-size:1em;
-  }
+  .label { position:fixed; left:20px; background:rgba(0,0,0,0.6);
+           padding:8px 12px; border-radius:6px; font-size:1em; margin-top:0; }
   .coords { top:20px; }
   .increment { top:60px; }
   .channel-change { top:100px; }
   .timer { top:140px; }
+  .indicator { top:180px; width:30px; height:30px; border-radius:50%; background:gray; }
 </style>
 </head>
 <body>
@@ -23,10 +22,11 @@
   <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
 </video>
 
-<div class="coords" id="coords">Y: 0</div>
-<div class="increment" id="increment">Incremento actual: 0</div>
-<div class="channel-change" id="channelChange">Canal actual: 1  Movimiento: 0</div>
-<div class="timer" id="timer">Tiempo desde primer gesto: 0s</div>
+<div class="label coords" id="coords">Y: 0</div>
+<div class="label increment" id="increment">Incremento actual: 0</div>
+<div class="label channel-change" id="channelChange">Canal actual: 1  Movimiento: 0</div>
+<div class="label timer" id="timer">Tiempo desde primer gesto: 0s</div>
+<div class="label indicator" id="indicator"></div>
 
 <script>
 // --- Canales de prueba
@@ -42,6 +42,7 @@ const coords = document.getElementById("coords");
 const incrementLabel = document.getElementById("increment");
 const channelLabel = document.getElementById("channelChange");
 const timerLabel = document.getElementById("timer");
+const indicator = document.getElementById("indicator");
 
 function playChannel(movement = 0) {
   video.src = categorias[0].canales[canalSeleccionado].video;
@@ -50,21 +51,26 @@ function playChannel(movement = 0) {
 }
 
 // --- Configuración
-const MAX_INCREMENT = 20;    // máximo incremento válido
-const MAX_INTERVAL = 1000;   // ms máximo entre movimientos
+const MAX_INCREMENT = 20;   // px máximo para movimiento corto
+const MIN_INTERVAL = 500;   // ms mínimo entre primer y segundo
+const MAX_INTERVAL = 1000;  // ms máximo entre primer y segundo
+const RESET_DELAY = 3000;   // ms antes de permitir nuevo gesto
 
 let gestureStartY = null;
 let firstMoveTime = null;
 let firstMoveDelta = 0;
 let waitingSecond = false;
+let gestureLocked = false;
 
 // Temporizador
 let timerStart = null;
 let timerInterval = null;
 
 // --- Mousemove
-document.addEventListener("mousemove", e=>{
+document.addEventListener("mousemove", e => {
   coords.textContent = `Y: ${e.clientY}`;
+
+  if(gestureLocked) return; // espera después de detección
 
   if(gestureStartY === null){
     gestureStartY = e.clientY;
@@ -76,9 +82,11 @@ document.addEventListener("mousemove", e=>{
   gestureStartY = e.clientY;
 
   if(Math.abs(delta) > MAX_INCREMENT){
-    // movimiento largo: reiniciar
+    // movimiento largo: reiniciar primer gesto
     firstMoveTime = null;
     waitingSecond = false;
+    indicator.style.background = "gray";
+    if(timerInterval){ clearInterval(timerInterval); timerInterval=null; timerLabel.textContent="Tiempo desde primer gesto: 0s"; }
     return;
   }
 
@@ -89,32 +97,46 @@ document.addEventListener("mousemove", e=>{
     firstMoveTime = now;
     firstMoveDelta = delta;
     waitingSecond = true;
+    indicator.style.background = "orange"; // indica primer movimiento
 
     // iniciar temporizador
     timerStart = now;
     if(timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(()=>{
-      const seconds = Math.floor((Date.now()-timerStart)/1000);
+      const seconds = ((Date.now()-timerStart)/1000).toFixed(1);
       timerLabel.textContent = `Tiempo desde primer gesto: ${seconds}s`;
-    }, 200);
+    }, 100);
 
   } else {
-    // segundo movimiento: validar tiempo y misma dirección
+    // segundo movimiento: validar intervalo y misma dirección
     const elapsed = now - firstMoveTime;
-    if(elapsed <= MAX_INTERVAL && Math.sign(delta) === Math.sign(firstMoveDelta)){
+    if(elapsed >= MIN_INTERVAL && elapsed <= MAX_INTERVAL && Math.sign(delta) === Math.sign(firstMoveDelta)){
       // gesto válido → cambiar canal
       const movement = delta < 0 ? -1 : 1;
       canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
       playChannel(movement);
+
+      indicator.style.background = "green"; // segundo movimiento detectado
+
+      // bloquear nuevos gestos por RESET_DELAY
+      gestureLocked = true;
+      setTimeout(()=>{
+        gestureLocked = false;
+        waitingSecond = false;
+        firstMoveTime = null;
+        firstMoveDelta = 0;
+        indicator.style.background = "gray";
+        timerLabel.textContent = "Tiempo desde primer gesto: 0s";
+      }, RESET_DELAY);
+
+    } else {
+      // no válido → descartar
+      waitingSecond = false;
+      firstMoveTime = null;
+      firstMoveDelta = 0;
+      indicator.style.background = "gray";
+      if(timerInterval){ clearInterval(timerInterval); timerInterval=null; timerLabel.textContent="Tiempo desde primer gesto: 0s"; }
     }
-
-    // reset
-    waitingSecond = false;
-    firstMoveTime = null;
-    firstMoveDelta = 0;
-
-    if(timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-    timerLabel.textContent = `Tiempo desde primer gesto: 0s`;
   }
 });
 </script>
