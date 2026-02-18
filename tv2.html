@@ -428,8 +428,14 @@ function resetInactivityTimer() {
 
 document.addEventListener("keydown",(e)=>{
 
+ // resetInactivityTimer();
+ e.preventDefault();
+  e.stopPropagation();
+
   resetInactivityTimer();
 
+  let key = e.key;   
+  let code = e.keyCode || e.which;
   
   // Números 0–9
   if (code >= 48 && code <= 57) {
@@ -457,7 +463,7 @@ document.addEventListener("keydown",(e)=>{
 
 
   // FLECHAS, ENTER Y RETURN — COMPATIBLE TIZEN
- 
+ /*
   switch(code) {
     case 37: // ←
       if (!panelVisible) {
@@ -554,6 +560,54 @@ document.addEventListener("keydown",(e)=>{
     break;
 }
 */
+  switch(key) {
+
+    case "ArrowLeft":
+      if (!panelVisible) {
+        panelVisible=true;
+        panel.classList.add("visible");
+      } else {
+        categoriaActual = (categoriaActual - 1 + categorias.length) % categorias.length;
+        canalSeleccionado = 0;
+        generarTabs();
+        generarLista();
+      }
+      break;
+
+    case "ArrowRight":
+      if (panelVisible) {
+        categoriaActual = (categoriaActual + 1) % categorias.length;
+        canalSeleccionado = 0;
+        generarTabs();
+        generarLista();
+      }
+      break;
+
+    case "ArrowUp":
+      canalSeleccionado = (canalSeleccionado - 1 + categorias[categoriaActual].canales.length) %
+                          categorias[categoriaActual].canales.length;
+      updateSelection();
+      if (!panelVisible) changeChannel();
+      break;
+
+    case "ArrowDown":
+      canalSeleccionado = (canalSeleccionado + 1) %
+                          categorias[categoriaActual].canales.length;
+      updateSelection();
+      if (!panelVisible) changeChannel();
+      break;
+
+    case "Enter":
+      changeChannel();
+      break;
+
+    case "Backspace":
+    case "Escape":
+      panelVisible=false;
+      panel.classList.remove("visible");
+      overlay.classList.add("hidden");
+      break;
+  }
   updateSelection();
 });
 
