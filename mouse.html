@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto doble para cambiar canal</title>
+<title>Gesto doble con pausa seguro</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
@@ -36,22 +36,22 @@ const coords = document.getElementById("coords");
 const incrementLabel = document.getElementById("increment");
 const channelLabel = document.getElementById("channelChange");
 
-function playChannel() {
+function playChannel(movement = 0) {
   video.src = categorias[0].canales[canalSeleccionado].video;
   video.play();
-  channelLabel.textContent = `Canal actual: ${canalSeleccionado + 1}`;
+  channelLabel.textContent = `Canal actual: ${canalSeleccionado + 1}  Movimiento: ${movement>0?"+":"-"}${Math.abs(movement)}`;
 }
-playChannel();
+playChannel(0);
 
-// --- Gestos
-const MAX_SMALL_INCREMENT = 35;
-const MIN_INCREMENT_FOR_CHANNEL = 10;
-const MAX_INTERVAL = 1000;
+// --- Gestos cortos consecutivos
+const MAX_INCREMENT = 35;      // incremento máximo permitido para detectar
+const MIN_INCREMENT = 10;      // incremento mínimo para contar como gesto
+const MAX_INTERVAL = 1000;     // intervalo máximo entre dos gestos en ms
 
-let gestureStartY = null;
-let gestureStartTime = null;
-let lastDirection = null;
-let firstGestureTime = null;
+let lastGestureDirection = null;  
+let lastGestureTime = null;      
+let gestureStartY = null;        
+let gestureStartTime = null;     
 
 document.addEventListener("mousemove", (e)=>{
   const now = Date.now();
@@ -65,40 +65,40 @@ document.addEventListener("mousemove", (e)=>{
   }
 
   const deltaY = e.clientY - gestureStartY;
-  const elapsed = now - gestureStartTime;
+  const absDeltaY = Math.abs(deltaY);
+  const duration = now - gestureStartTime;
 
-  // Solo incrementos pequeños
-  if(Math.abs(deltaY) < MAX_SMALL_INCREMENT && elapsed <= MAX_INTERVAL){
-    incrementLabel.textContent = `Incremento actual: ${deltaY.toFixed(0)}`;
-
-    let direction = null;
-    if(deltaY >= MIN_INCREMENT_FOR_CHANNEL) direction = "down";
-    else if(deltaY <= -MIN_INCREMENT_FOR_CHANNEL) direction = "up";
-
-    if(direction){
-      // Si es mismo gesto repetido dentro de 1s → cambiar canal
-      if(lastDirection === direction && firstGestureTime && (now - firstGestureTime <= MAX_INTERVAL)){
-        if(direction==="up") canalSeleccionado = (canalSeleccionado-1+categorias[0].canales.length)%categorias[0].canales.length;
-        else canalSeleccionado = (canalSeleccionado+1)%categorias[0].canales.length;
-
-        playChannel();
-        // reset
-        lastDirection = null;
-        firstGestureTime = null;
-      } else {
-        // primer gesto detectado
-        lastDirection = direction;
-        firstGestureTime = now;
-      }
-    }
-
-  } else {
-    // Movimiento grande o lento → reset
+  // Reset si el movimiento es largo o lento → NO cambiar canal
+  if(absDeltaY > MAX_INCREMENT || duration > MAX_INTERVAL){
     gestureStartY = e.clientY;
     gestureStartTime = now;
-    lastDirection = null;
-    firstGestureTime = null;
     incrementLabel.textContent = `Incremento actual: 0`;
+    lastGestureDirection = null;
+    lastGestureTime = null;
+    channelLabel.textContent = `Movimiento canal: 0`;
+    return;
+  }
+
+  // Mostrar incremento solo si es suficiente
+  if(absDeltaY >= MIN_INCREMENT){
+    incrementLabel.textContent = `Incremento actual: ${deltaY.toFixed(0)}`;
+    const direction = deltaY < 0 ? "up" : "down";
+
+    if(lastGestureDirection === direction && lastGestureTime && (now - lastGestureTime <= MAX_INTERVAL)){
+      // Segundo gesto dentro del tiempo → cambiar canal
+      const movement = direction === "up" ? -1 : 1;
+      canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
+      playChannel(movement);
+
+      // Reset para detectar el siguiente gesto
+      lastGestureDirection = null;
+      lastGestureTime = null;
+    } else {
+      // Primer gesto detectado
+      lastGestureDirection = direction;
+      lastGestureTime = now;
+      channelLabel.textContent = `Movimiento canal: ${direction==="up"? "-":"+"}`;
+    }
   }
 
   gestureStartY = e.clientY;
