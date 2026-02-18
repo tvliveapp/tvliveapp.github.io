@@ -1,3 +1,4 @@
+const BASE_URL = "https://la14hd.com/vivo/canales.php?stream=";
 const categorias = [
   {
     nombre: "TV en Vivo",
