@@ -614,54 +614,71 @@ document.addEventListener("keydown",(e)=>{
 //////
 
 ///////////////////////////////////////////////////////////////////
-// -------- CONTROL POR GESTO DE MOUSE (LG MAGIC REMOTE) --------
+// -------- DOBLE GESTO VERTICAL (LG MAGIC REMOTE) --------------- 
 ///////////////////////////////////////////////////////////////////
 
-let mouseStartY = 0;
-let mouseStartTime = 0;
+let gestureDirection = null;   // "up" o "down"
+let gestureCount = 0;
+let lastMoveTime = 0;
+let startY = 0;
+let isMoving = false;
 
 document.addEventListener("mousemove", (e) => {
 
-  const currentTime = Date.now();
+  const now = Date.now();
 
-  // Si es el primer movimiento
-  if (mouseStartTime === 0) {
-    mouseStartY = e.clientY;
-    mouseStartTime = currentTime;
+  // Inicio del movimiento
+  if (!isMoving) {
+    startY = e.clientY;
+    isMoving = true;
     return;
   }
 
-  const deltaY = e.clientY - mouseStartY;
-  const deltaTime = currentTime - mouseStartTime;
+  const deltaY = e.clientY - startY;
 
-  // Detectar gesto rápido vertical
-  if (Math.abs(deltaY) > 120 && deltaTime < 400) {
+  // Movimiento suficientemente grande
+  if (Math.abs(deltaY) > 100) {
 
-    if (deltaY < 0) {
-      // 🔼 Movimiento rápido hacia arriba
-      canalSeleccionado = (canalSeleccionado - 1 +
-        categorias[categoriaActual].canales.length) %
-        categorias[categoriaActual].canales.length;
+    const direction = deltaY < 0 ? "up" : "down";
 
+    // Si es el mismo gesto dentro del tiempo permitido
+    if (gestureDirection === direction && (now - lastMoveTime) < 800) {
+      gestureCount++;
     } else {
-      // 🔽 Movimiento rápido hacia abajo
-      canalSeleccionado = (canalSeleccionado + 1) %
-        categorias[categoriaActual].canales.length;
+      gestureDirection = direction;
+      gestureCount = 1;
     }
 
-    updateSelection();
-    if (!panelVisible) changeChannel();
+    lastMoveTime = now;
+    isMoving = false;
 
-    // Reset
-    mouseStartTime = 0;
+    // 🔥 Si detecta 2 gestos consecutivos
+    if (gestureCount >= 2) {
+
+      if (direction === "up") {
+        canalSeleccionado = (canalSeleccionado - 1 +
+          categorias[categoriaActual].canales.length) %
+          categorias[categoriaActual].canales.length;
+      } else {
+        canalSeleccionado = (canalSeleccionado + 1) %
+          categorias[categoriaActual].canales.length;
+      }
+
+      updateSelection();
+      if (!panelVisible) changeChannel();
+
+      // Reset
+      gestureCount = 0;
+      gestureDirection = null;
+    }
   }
 
-  // Si pasa mucho tiempo, reinicia
-  if (deltaTime > 500) {
-    mouseStartTime = 0;
+  // Si pasa mucho tiempo sin segundo gesto → reset
+  if ((now - lastMoveTime) > 1000) {
+    gestureCount = 0;
+    gestureDirection = null;
   }
 });
-
 
   ////
   
