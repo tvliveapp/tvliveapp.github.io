@@ -1,6 +1,6 @@
 //document.location="https://shawon9324.github.io/apps/keytester/"
     var player="";
-    var playbackURL = "https://tyg2mnl9.fubohd.com/espn2/mono.m3u8?token=87bed6eaf0084f5791a74c933789dab87947f649-f0-1771392487-1771374487";
+    var playbackURL = "https://x4bnd7lq.fubohd.com/disney11/mono.m3u8?token=0bdc71319b59177117a31bfeeb45871f35c4e273-cb-1771397729-1771379729";
     var p2pConfig = {
         live: true,
         trackerZone: 'us',    
