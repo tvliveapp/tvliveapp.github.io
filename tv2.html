@@ -428,17 +428,9 @@ function resetInactivityTimer() {
 
 document.addEventListener("keydown",(e)=>{
 
-  //resetInactivityTimer();
-
-   e.preventDefault();   // 🔥 IMPORTANTE en LG
-  e.stopPropagation();  // 🔥 Evita que el cursor se mueva
-
   resetInactivityTimer();
 
-  let key = e.key;      // más compatible
-  let code = e.keyCode || e.which;
-  let code = e.keyCode || e.which;
-
+  
   // Números 0–9
   if (code >= 48 && code <= 57) {
     const digit = String.fromCharCode(code);
@@ -465,7 +457,7 @@ document.addEventListener("keydown",(e)=>{
 
 
   // FLECHAS, ENTER Y RETURN — COMPATIBLE TIZEN
- /*
+ 
   switch(code) {
     case 37: // ←
       if (!panelVisible) {
@@ -512,7 +504,7 @@ document.addEventListener("keydown",(e)=>{
       overlay.classList.add("hidden");
       break;
   }
-*/
+/*
   switch(key) {
 
   case "ArrowLeft":
@@ -561,7 +553,7 @@ document.addEventListener("keydown",(e)=>{
     overlay.classList.add("hidden");
     break;
 }
-
+*/
   updateSelection();
 });
 
