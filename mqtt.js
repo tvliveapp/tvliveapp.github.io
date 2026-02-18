@@ -31,7 +31,7 @@ try{
 function setMqttConnected() {
         if(mqttIndi){
             mqttStatus.textContent = '●';
-            mqttStatus.style.color = 'white'; // o verde si quieres
+            mqttStatus.style.color = 'green'; // o verde si quieres
         }
 }
 
