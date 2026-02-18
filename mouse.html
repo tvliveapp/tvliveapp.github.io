@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto Flechas TV</title>
+<title>Gesto Flechas TV con Código</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   .info { position:fixed; bottom:20px; left:20px; background:rgba(0,0,0,0.6); padding:10px 15px; border-radius:8px; font-size:1.1em; }
   .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
   .sequence { position:fixed; top:60px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
+  .keycode { position:fixed; top:100px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
 </style>
 </head>
 <body>
@@ -16,6 +17,7 @@
 <div class="info" id="info">Canal: 1</div>
 <div class="coords" id="coords">Sim Y: 0</div>
 <div class="sequence" id="sequence">Secuencia: idle</div>
+<div class="keycode" id="keycode">Última tecla: -</div>
 
 <script>
 // --- Canales de prueba
@@ -29,6 +31,7 @@ let canalSeleccionado = 0;
 const info = document.getElementById("info");
 const coords = document.getElementById("coords");
 const sequenceLabel = document.getElementById("sequence");
+const keyCodeLabel = document.getElementById("keycode");
 
 // --- Variables de gesto
 let gestureStage = 0; // 0: idle, 1: primer move, 2: pausa, 3: segundo move
@@ -50,6 +53,9 @@ function playChannel() {
 
 // --- Manejo de flechas (simula el movimiento)
 document.addEventListener("keydown", (e)=>{
+  // Mostrar código de la tecla
+  keyCodeLabel.textContent = `Última tecla: ${e.key} (${e.keyCode})`;
+
   if(e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
 
   const delta = e.key === "ArrowUp" ? -MOVE_UNIT : MOVE_UNIT;
@@ -72,20 +78,6 @@ document.addEventListener("keydown", (e)=>{
       updateSequenceLabel();
     }, 500); // 500ms pausa máxima
   }
-  // Si ya hubo pausa y llega segundo movimiento corto
-  else if(gestureStage === 2 && Math.abs(accumulated) >= MIN_MOVE && Math.abs(accumulated) <= MAX_MOVE){
-    if((delta < 0 ? "up" : "down") === gestureDirection){
-      // Cambiar canal
-      if(gestureDirection==="up") canalSeleccionado = (canalSeleccionado-1+categorias[0].canales.length)%categorias[0].canales.length;
-      else canalSeleccionado = (canalSeleccionado+1)%categorias[0].canales.length;
-
-      playChannel();
-    }
-    gestureStage = 0;
-    accumulated = 0;
-    updateSequenceLabel();
-  }
-
   // Si primer movimiento ya detectado, pasar a pausa
   else if(gestureStage===1){
     gestureStage=2;
@@ -98,6 +90,19 @@ document.addEventListener("keydown", (e)=>{
       gestureStage = 0;
       updateSequenceLabel();
     }, 500);
+  }
+  // Si ya hubo pausa y llega segundo movimiento corto
+  else if(gestureStage === 2 && Math.abs(accumulated) >= MIN_MOVE && Math.abs(accumulated) <= MAX_MOVE){
+    if((delta < 0 ? "up" : "down") === gestureDirection){
+      // Cambiar canal
+      if(gestureDirection==="up") canalSeleccionado = (canalSeleccionado-1+categorias[0].canales.length)%categorias[0].canales.length;
+      else canalSeleccionado = (canalSeleccionado+1)%categorias[0].canales.length;
+
+      playChannel();
+    }
+    gestureStage = 0;
+    accumulated = 0;
+    updateSequenceLabel();
   }
 });
 </script>
