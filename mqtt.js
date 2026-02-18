@@ -379,7 +379,7 @@ var websocketclient = {
 websocketclient.connect();
 
 function publicar(topico,data) {
-         data.id=myId;
+         
          websocketclient.publish(topico, data, 0, false);
         
   }
