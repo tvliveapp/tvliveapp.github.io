@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Incremento canal</title>
+<title>Gesto doble para cambiar canal</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
@@ -23,50 +23,86 @@
 <div class="channel-change" id="channelChange">Movimiento canal: 0</div>
 
 <script>
-// --- Configuración
-const MAX_SMALL_INCREMENT = 35; // máximo incremento considerado "pequeño"
-const MAX_INTERVAL = 1000;       // 1 segundo para considerar el gesto
+// --- Canales de prueba
+const categorias = [{nombre:"Todos", canales:[
+  {nombre:"Canal 1", video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {nombre:"Canal 2", video:"https://www.w3schools.com/html/movie.mp4"},
+  {nombre:"Canal 3", video:"https://www.w3schools.com/html/mov_bbb.mp4"}
+]}];
 
-// Variables
-let gestureStartY = null;
-let gestureStartTime = null;
-
+let canalSeleccionado = 0;
+const video = document.getElementById("tv-video");
 const coords = document.getElementById("coords");
 const incrementLabel = document.getElementById("increment");
 const channelLabel = document.getElementById("channelChange");
 
-// Evento mousemove
-document.addEventListener("mousemove", (e) => {
+function playChannel() {
+  video.src = categorias[0].canales[canalSeleccionado].video;
+  video.play();
+  channelLabel.textContent = `Canal actual: ${canalSeleccionado + 1}`;
+}
+playChannel();
+
+// --- Gestos
+const MAX_SMALL_INCREMENT = 35;
+const MIN_INCREMENT_FOR_CHANNEL = 10;
+const MAX_INTERVAL = 1000;
+
+let gestureStartY = null;
+let gestureStartTime = null;
+let lastDirection = null;
+let firstGestureTime = null;
+
+document.addEventListener("mousemove", (e)=>{
   const now = Date.now();
   coords.textContent = `Y: ${e.clientY}`;
 
-  if (gestureStartY === null) {
-    // Primer movimiento de gesto
+  if(gestureStartY === null){
     gestureStartY = e.clientY;
     gestureStartTime = now;
     incrementLabel.textContent = `Incremento actual: 0`;
-    channelLabel.textContent = `Movimiento canal: 0`;
     return;
   }
 
   const deltaY = e.clientY - gestureStartY;
   const elapsed = now - gestureStartTime;
 
-  // Solo considerar incrementos pequeños y dentro del tiempo límite
-  if (Math.abs(deltaY) < MAX_SMALL_INCREMENT && elapsed <= MAX_INTERVAL) {
+  // Solo incrementos pequeños
+  if(Math.abs(deltaY) < MAX_SMALL_INCREMENT && elapsed <= MAX_INTERVAL){
     incrementLabel.textContent = `Incremento actual: ${deltaY.toFixed(0)}`;
 
-    // Determinar movimiento de canal
-    if (deltaY >= 10) channelLabel.textContent = `Movimiento canal: +`;
-    else if (deltaY <= -10) channelLabel.textContent = `Movimiento canal: -`;
-    else channelLabel.textContent = `Movimiento canal: 0`;
+    let direction = null;
+    if(deltaY >= MIN_INCREMENT_FOR_CHANNEL) direction = "down";
+    else if(deltaY <= -MIN_INCREMENT_FOR_CHANNEL) direction = "up";
+
+    if(direction){
+      // Si es mismo gesto repetido dentro de 1s → cambiar canal
+      if(lastDirection === direction && firstGestureTime && (now - firstGestureTime <= MAX_INTERVAL)){
+        if(direction==="up") canalSeleccionado = (canalSeleccionado-1+categorias[0].canales.length)%categorias[0].canales.length;
+        else canalSeleccionado = (canalSeleccionado+1)%categorias[0].canales.length;
+
+        playChannel();
+        // reset
+        lastDirection = null;
+        firstGestureTime = null;
+      } else {
+        // primer gesto detectado
+        lastDirection = direction;
+        firstGestureTime = now;
+      }
+    }
+
   } else {
-    // Resetea el gesto si el movimiento es grande o lento
+    // Movimiento grande o lento → reset
     gestureStartY = e.clientY;
     gestureStartTime = now;
+    lastDirection = null;
+    firstGestureTime = null;
     incrementLabel.textContent = `Incremento actual: 0`;
-    channelLabel.textContent = `Movimiento canal: 0`;
   }
+
+  gestureStartY = e.clientY;
+  gestureStartTime = now;
 });
 </script>
 </body>
