@@ -245,7 +245,7 @@ var websocketclient = {
     'render': {
 
         'showError': function (message) {
-            alert(message);
+            console.log(message);
         },
         'messages': function () {
 
