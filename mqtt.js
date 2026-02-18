@@ -125,7 +125,7 @@ var websocketclient = {
         };
 
         console.log(messageObj);
-        document.getElementById('msgBox').innerText = message.payloadString+"\n";
+      //  document.getElementById('msgBox').innerText = message.payloadString+"\n";
         try {
           // Code that might throw an error (exception)
             mqttMessage(message.payloadString);
