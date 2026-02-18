@@ -3,41 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flechas TV Simple</title>
+<title>TV con gesto y teclas</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
-  .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1.2em; }
-  .keycode { position:fixed; top:60px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1.2em; }
+  video { width:100vw; height:100vh; object-fit:cover; display:block; }
+  .info { position:fixed; bottom:20px; left:20px; background:rgba(0,0,0,0.6); padding:10px 15px; border-radius:8px; font-size:1.1em; }
+  .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
+  .keycode { position:fixed; top:60px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
 </style>
 </head>
 <body>
 
-<div class="coords" id="coords">Y: 0</div>
+<video id="tv-video" autoplay muted loop>
+  <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+</video>
+
+<div class="info" id="info">Canal: 1</div>
+<div class="coords" id="coords">X: 0, Y: 0</div>
 <div class="keycode" id="keycode">Última tecla: -</div>
 
 <script>
-let yCoord = 0;
-const MOVE_UNIT = 16; // cada flecha incrementa 16 unidades
-const coordsLabel = document.getElementById("coords");
-const keyLabel = document.getElementById("keycode");
+// --- Canales de prueba
+const categorias = [{nombre:"Todos", canales:[
+  {nombre:"Canal 1", video:"https://www.w3schools.com/html/mov_bbb.mp4"},
+  {nombre:"Canal 2", video:"https://www.w3schools.com/html/movie.mp4"},
+  {nombre:"Canal 3", video:"https://www.w3schools.com/html/mov_bbb.mp4"}
+]}];
 
-document.addEventListener("keydown", (e)=>{
-  // Mostrar tecla presionada
-  keyLabel.textContent = `Última tecla: ${e.key} (${e.keyCode})`;
+let categoriaActual=0, canalSeleccionado=0;
+const video=document.getElementById("tv-video");
+const info=document.getElementById("info");
+const coords=document.getElementById("coords");
+const keyLabel=document.getElementById("keycode");
 
-  // Incrementar/decrementar solo si flecha arriba/abajo
-  if(e.key === "ArrowUp"){
-    yCoord -= MOVE_UNIT;
-  } else if(e.key === "ArrowDown"){
-    yCoord += MOVE_UNIT;
-  } else {
+function playChannel() {
+  video.src = categorias[categoriaActual].canales[canalSeleccionado].video;
+  video.play();
+  info.textContent = "Canal: " + (canalSeleccionado + 1);
+}
+playChannel();
+
+///////////////////////////////////////////////////////////////////
+// --- GESTO CON PAUSA (DOBLE MOVIMIENTO CORTO)
+///////////////////////////////////////////////////////////////////
+
+let gestureDirection = null;
+let waitingSecond = false;
+let gestureStartY = 0;
+let gestureStartTime = 0;
+let paused = false;
+
+const MIN_DISTANCE = 60;
+const MAX_DISTANCE = 160;
+const MAX_DURATION = 300;
+const PAUSE_MAX = 900; // ms máximo entre movimientos
+
+document.addEventListener("mousemove",(e)=>{
+  const now = Date.now();
+  coords.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
+
+  if(!gestureStartTime){
+    gestureStartY = e.clientY;
+    gestureStartTime = now;
     return;
   }
 
-  // Mostrar coordenada acumulada
-  coordsLabel.textContent = `Y: ${yCoord}`;
+  const deltaY = e.clientY - gestureStartY;
+  const distance = Math.abs(deltaY);
+  const duration = now - gestureStartTime;
+
+  // Reset si movimiento largo o lento
+  if(distance > MAX_DISTANCE || duration > MAX_DURATION){
+    gestureStartY = e.clientY;
+    gestureStartTime = now;
+    paused = false;
+    return;
+  }
+
+  // Movimiento corto válido
+  if(distance > MIN_DISTANCE){
+    const direction = deltaY < 0 ? "up" : "down";
+
+    if(!waitingSecond){
+      // Primer gesto
+      gestureDirection = direction;
+      waitingSecond = true;
+      paused = true;
+
+      setTimeout(()=>{
+        if(paused) waitingSecond=false;
+        paused=false;
+      }, PAUSE_MAX);
+    } else if(direction === gestureDirection && paused){
+      // Segundo gesto después de pausa → cambiar canal
+      if(direction==="up") canalSeleccionado = (canalSeleccionado-1+categorias[categoriaActual].canales.length)%categorias[categoriaActual].canales.length;
+      else canalSeleccionado = (canalSeleccionado+1)%categorias[categoriaActual].canales.length;
+
+      playChannel();
+      waitingSecond = false;
+      paused = false;
+    } else {
+      // Gesto diferente o sin pausa
+      waitingSecond = false;
+      paused = false;
+    }
+
+    gestureStartY = e.clientY;
+    gestureStartTime = now;
+  }
+});
+
+///////////////////////////////////////////////////////////////////
+// --- TECLAS ARRIBA/ABAJO CON INCREMENTO DE 16
+///////////////////////////////////////////////////////////////////
+
+let yCoord = 0;
+const MOVE_UNIT = 16;
+
+document.addEventListener("keydown",(e)=>{
+  keyLabel.textContent = `Última tecla: ${e.key} (${e.keyCode})`;
+
+  if(e.key === "ArrowUp"){
+    yCoord -= MOVE_UNIT;
+    canalSeleccionado = (canalSeleccionado-1+categorias[categoriaActual].canales.length)%categorias[categoriaActual].canales.length;
+    playChannel();
+  } else if(e.key === "ArrowDown"){
+    yCoord += MOVE_UNIT;
+    canalSeleccionado = (canalSeleccionado+1)%categorias[categoriaActual].canales.length;
+    playChannel();
+  }
+
+  coords.textContent = `X: -, Y: ${yCoord}`;
 });
 </script>
-
 </body>
 </html>
