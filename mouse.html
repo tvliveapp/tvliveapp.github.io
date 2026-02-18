@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prueba Doble Gesto Corto</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    overflow: hidden;
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+
+  video {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    display: block;
+  }
+
+  .info {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0,0,0,0.6);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 1.1em;
+  }
+</style>
+</head>
+<body>
+
+<video id="tv-video" autoplay muted loop>
+  <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+</video>
+
+<div class="info" id="info">Canal: 1</div>
+
+<script>
+///////////////////////////////////////////////////////////////////
+// --- CANALES DE PRUEBA
+///////////////////////////////////////////////////////////////////
+const categorias = [
+  {
+    nombre: "Todos",
+    canales: [
+      { nombre: "Canal 1", video: "https://www.w3schools.com/html/mov_bbb.mp4" },
+      { nombre: "Canal 2", video: "https://www.w3schools.com/html/movie.mp4" },
+      { nombre: "Canal 3", video: "https://www.w3schools.com/html/mov_bbb.mp4" }
+    ]
+  }
+];
+
+let categoriaActual = 0;
+let canalSeleccionado = 0;
+
+const video = document.getElementById("tv-video");
+const info = document.getElementById("info");
+
+function playChannel() {
+  video.src = categorias[categoriaActual].canales[canalSeleccionado].video;
+  video.play();
+  info.textContent = "Canal: " + (canalSeleccionado+1);
+}
+
+playChannel();
+
+///////////////////////////////////////////////////////////////////
+// --- DOBLE GESTO CORTO VERTICAL
+///////////////////////////////////////////////////////////////////
+
+let gestureDirection = null;
+let waitingSecondGesture = false;
+let gestureStartY = 0;
+let gestureStartTime = 0;
+
+const MIN_DISTANCE = 60;
+const MAX_DISTANCE = 160;
+const MAX_DURATION = 300;
+const MAX_INTERVAL = 900;
+
+document.addEventListener("mousemove", (e) => {
+
+  const now = Date.now();
+
+  if (!gestureStartTime) {
+    gestureStartY = e.clientY;
+    gestureStartTime = now;
+    return;
+  }
+
+  const deltaY = e.clientY - gestureStartY;
+  const distance = Math.abs(deltaY);
+  const duration = now - gestureStartTime;
+
+  if (distance > MAX_DISTANCE) { resetGesture(); return; }
+  if (duration > MAX_DURATION) { resetGesture(); return; }
+
+  if (distance > MIN_DISTANCE) {
+
+    const direction = deltaY < 0 ? "up" : "down";
+
+    if (!waitingSecondGesture) {
+      gestureDirection = direction;
+      waitingSecondGesture = true;
+      gestureStartTime = 0;
+      setTimeout(() => { if (!gestureDirection) resetGesture(); }, MAX_INTERVAL);
+
+    } else if (direction === gestureDirection) {
+      if (direction === "up") {
+        canalSeleccionado = (canalSeleccionado - 1 + categorias[categoriaActual].canales.length)
+                           % categorias[categoriaActual].canales.length;
+      } else {
+        canalSeleccionado = (canalSeleccionado + 1) % categorias[categoriaActual].canales.length;
+      }
+
+      playChannel();
+      resetGesture();
+    } else {
+      resetGesture();
+    }
+  }
+});
+
+function resetGesture() {
+  gestureDirection = null;
+  waitingSecondGesture = false;
+  gestureStartTime = 0;
+}
+</script>
+
+</body>
+</html>
