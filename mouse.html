@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto corto con pausa</title>
+<title>Gesto corto con pausa y temporizador</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
   .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
   .increment { position:fixed; top:60px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
   .channel-change { position:fixed; top:100px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
+  .timer { position:fixed; top:140px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
 </style>
 </head>
 <body>
@@ -21,6 +22,7 @@
 <div class="coords" id="coords">Y: 0</div>
 <div class="increment" id="increment">Incremento actual: 0</div>
 <div class="channel-change" id="channelChange">Movimiento canal: 0</div>
+<div class="timer" id="timer">Tiempo desde primer gesto: 0s</div>
 
 <script>
 // --- Canales de prueba
@@ -35,6 +37,7 @@ const video = document.getElementById("tv-video");
 const coords = document.getElementById("coords");
 const incrementLabel = document.getElementById("increment");
 const channelLabel = document.getElementById("channelChange");
+const timerLabel = document.getElementById("timer");
 
 function playChannel(movement = 0) {
   video.src = categorias[0].canales[canalSeleccionado].video;
@@ -50,6 +53,10 @@ const PAUSE_MAX = 1000;   // ms máximo de pausa
 
 let lastGestureTime = 0;
 let gestureStartY = null;
+
+// Temporizador
+let timerStart = null;
+let timerInterval = null;
 
 document.addEventListener("mousemove", (e)=>{
   const now = Date.now();
@@ -74,6 +81,15 @@ document.addEventListener("mousemove", (e)=>{
   const pause = now - lastGestureTime;
 
   if(pause >= PAUSE_MIN && pause <= PAUSE_MAX){
+    // Inicia temporizador si es el primer movimiento válido
+    if(!timerStart){
+      timerStart = now;
+      timerInterval = setInterval(()=>{
+        const seconds = Math.floor((Date.now() - timerStart)/1000);
+        timerLabel.textContent = `Tiempo desde primer gesto: ${seconds}s`;
+      }, 1000);
+    }
+
     // Movimiento válido → cambiar canal
     const movement = deltaY < 0 ? -1 : 1;
     canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
