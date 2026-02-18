@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto corto con pausa y temporizador</title>
+<title>Gesto corto con temporizador y cambio de canal</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
@@ -53,6 +53,7 @@ const PAUSE_MAX = 1000;   // ms máximo de pausa
 
 let lastGestureTime = 0;
 let gestureStartY = null;
+let gestureDirection = 0; // +1 hacia abajo, -1 hacia arriba
 
 // Temporizador
 let timerStart = null;
@@ -75,13 +76,18 @@ document.addEventListener("mousemove", (e)=>{
   // Ignorar movimientos grandes
   if(absDeltaY > MAX_DISTANCE){
     gestureStartY = e.clientY;
+    gestureDirection = 0; // resetea dirección
     return;
   }
 
+  const currentDirection = deltaY < 0 ? -1 : 1; // hacia arriba = -1, abajo = +1
   const pause = now - lastGestureTime;
 
-  if(pause >= PAUSE_MIN && pause <= PAUSE_MAX){
-    // Inicia temporizador si es el primer movimiento válido
+  if(currentDirection !== gestureDirection){
+    // primer movimiento o cambio de dirección: iniciar temporizador
+    gestureDirection = currentDirection;
+    lastGestureTime = now;
+
     if(!timerStart){
       timerStart = now;
       timerInterval = setInterval(()=>{
@@ -90,15 +96,20 @@ document.addEventListener("mousemove", (e)=>{
       }, 1000);
     }
 
-    // Movimiento válido → cambiar canal
-    const movement = deltaY < 0 ? -1 : 1;
+    gestureStartY = e.clientY;
+    return; // esperamos siguiente movimiento
+  }
+
+  // Segundo movimiento en la misma dirección y pausa válida
+  if(pause >= PAUSE_MIN && pause <= PAUSE_MAX){
+    const movement = currentDirection;
     canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
     playChannel(movement);
 
-    lastGestureTime = now; // reinicia pausa
+    lastGestureTime = now;
   }
 
-  gestureStartY = e.clientY; // reinicia el punto de inicio para el siguiente gesto
+  gestureStartY = e.clientY;
 });
 </script>
 </body>
