@@ -297,7 +297,7 @@ var websocketclient = {
         'message': function (message) {
 
             var largest = websocketclient.lastMessageId++;
-
+/*
             var html = '<li class="messLine id="' + largest + '">' +
                 '   <div class="row large-12 mess' + largest + '" style="border-left: solid 10px #' + message.color + '; ">' +
                 '       <div class="large-12 columns messageText">' +
@@ -313,7 +313,7 @@ var websocketclient = {
                 '       </div>' +
                 '   </div>' +
                 '</li>';
-            $("#messEdit").prepend(html);
+            $("#messEdit").prepend(html);*/
             return largest;
         },
 
@@ -338,24 +338,24 @@ var websocketclient = {
         },
 
         'toggle': function (name) {
-            $('.' + name + 'Arrow').toggleClass("closed");
-            $('.' + name + 'Top').toggleClass("closed");
-            var elem = $('#' + name + 'Main');
-            elem.slideToggle();
+         //   $('.' + name + 'Arrow').toggleClass("closed");
+          //  $('.' + name + 'Top').toggleClass("closed");
+          //  var elem = $('#' + name + 'Main');
+          //  elem.slideToggle();
         },
 
         'hide': function (name) {
-            $('.' + name + 'Arrow').addClass("closed");
-            $('.' + name + 'Top').addClass("closed");
-            var elem = $('#' + name + 'Main');
-            elem.slideUp();
+          //  $('.' + name + 'Arrow').addClass("closed");
+         //   $('.' + name + 'Top').addClass("closed");
+         //   var elem = $('#' + name + 'Main');
+         //   elem.slideUp();
         },
 
         'show': function (name) {
-            $('.' + name + 'Arrow').removeClass("closed");
-            $('.' + name + 'Top').removeClass("closed");
-            var elem = $('#' + name + 'Main');
-            elem.slideDown();
+          //  $('.' + name + 'Arrow').removeClass("closed");
+          //  $('.' + name + 'Top').removeClass("closed");
+          //  var elem = $('#' + name + 'Main');
+          //  elem.slideDown();
         },
 
         'removeSubscriptionsMessages': function (id) {
@@ -366,11 +366,11 @@ var websocketclient = {
         },
 
         'clearMessages': function () {
-            $("#messEdit").empty();
+         //   $("#messEdit").empty();
         },
 
         'clearSubscriptions': function () {
-            $("#innerEdit").empty();
+         //   $("#innerEdit").empty();
         }
     }
 };
