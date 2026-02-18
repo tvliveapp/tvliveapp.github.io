@@ -611,6 +611,60 @@ document.addEventListener("keydown",(e)=>{
   updateSelection();
 });
 
+//////
+
+///////////////////////////////////////////////////////////////////
+// -------- CONTROL POR GESTO DE MOUSE (LG MAGIC REMOTE) --------
+///////////////////////////////////////////////////////////////////
+
+let mouseStartY = 0;
+let mouseStartTime = 0;
+
+document.addEventListener("mousemove", (e) => {
+
+  const currentTime = Date.now();
+
+  // Si es el primer movimiento
+  if (mouseStartTime === 0) {
+    mouseStartY = e.clientY;
+    mouseStartTime = currentTime;
+    return;
+  }
+
+  const deltaY = e.clientY - mouseStartY;
+  const deltaTime = currentTime - mouseStartTime;
+
+  // Detectar gesto rápido vertical
+  if (Math.abs(deltaY) > 120 && deltaTime < 400) {
+
+    if (deltaY < 0) {
+      // 🔼 Movimiento rápido hacia arriba
+      canalSeleccionado = (canalSeleccionado - 1 +
+        categorias[categoriaActual].canales.length) %
+        categorias[categoriaActual].canales.length;
+
+    } else {
+      // 🔽 Movimiento rápido hacia abajo
+      canalSeleccionado = (canalSeleccionado + 1) %
+        categorias[categoriaActual].canales.length;
+    }
+
+    updateSelection();
+    if (!panelVisible) changeChannel();
+
+    // Reset
+    mouseStartTime = 0;
+  }
+
+  // Si pasa mucho tiempo, reinicia
+  if (deltaTime > 500) {
+    mouseStartTime = 0;
+  }
+});
+
+
+  ////
+  
   ///////////////////////////////////////////////////////////////////
 // -------------------- CONTROL TÁCTIL (ANDROID) -----------------
 ///////////////////////////////////////////////////////////////////
