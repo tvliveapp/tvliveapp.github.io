@@ -3,14 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto corto con temporizador y cambio de canal</title>
+<title>Gesto y flechas Samsung TV</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
-  .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
-  .increment { position:fixed; top:60px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
-  .channel-change { position:fixed; top:100px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
-  .timer { position:fixed; top:140px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
+  .coords, .increment, .channel-change, .timer, .keycode {
+    position:fixed; left:20px; background:rgba(0,0,0,0.6);
+    padding:8px 12px; border-radius:6px; font-size:1em;
+  }
+  .coords { top:20px; }
+  .increment { top:60px; }
+  .channel-change { top:100px; }
+  .timer { top:140px; }
+  .keycode { top:180px; }
 </style>
 </head>
 <body>
@@ -21,8 +26,9 @@
 
 <div class="coords" id="coords">Y: 0</div>
 <div class="increment" id="increment">Incremento actual: 0</div>
-<div class="channel-change" id="channelChange">Movimiento canal: 0</div>
+<div class="channel-change" id="channelChange">Canal actual: 1 Movimiento: 0</div>
 <div class="timer" id="timer">Tiempo desde primer gesto: 0s</div>
+<div class="keycode" id="keycode">Tecla presionada: -</div>
 
 <script>
 // --- Canales de prueba
@@ -38,6 +44,7 @@ const coords = document.getElementById("coords");
 const incrementLabel = document.getElementById("increment");
 const channelLabel = document.getElementById("channelChange");
 const timerLabel = document.getElementById("timer");
+const keycodeLabel = document.getElementById("keycode");
 
 function playChannel(movement = 0) {
   video.src = categorias[0].canales[canalSeleccionado].video;
@@ -59,6 +66,7 @@ let gestureDirection = 0; // +1 hacia abajo, -1 hacia arriba
 let timerStart = null;
 let timerInterval = null;
 
+// --- Detectar movimiento del mouse
 document.addEventListener("mousemove", (e)=>{
   const now = Date.now();
   coords.textContent = `Y: ${e.clientY}`;
@@ -73,7 +81,6 @@ document.addEventListener("mousemove", (e)=>{
   const absDeltaY = Math.abs(deltaY);
   incrementLabel.textContent = `Incremento actual: ${deltaY.toFixed(0)}`;
 
-  // Ignorar movimientos grandes
   if(absDeltaY > MAX_DISTANCE){
     gestureStartY = e.clientY;
     gestureDirection = 0; // resetea dirección
@@ -84,7 +91,6 @@ document.addEventListener("mousemove", (e)=>{
   const pause = now - lastGestureTime;
 
   if(currentDirection !== gestureDirection){
-    // primer movimiento o cambio de dirección: iniciar temporizador
     gestureDirection = currentDirection;
     lastGestureTime = now;
 
@@ -97,19 +103,30 @@ document.addEventListener("mousemove", (e)=>{
     }
 
     gestureStartY = e.clientY;
-    return; // esperamos siguiente movimiento
+    return;
   }
 
-  // Segundo movimiento en la misma dirección y pausa válida
   if(pause >= PAUSE_MIN && pause <= PAUSE_MAX){
     const movement = currentDirection;
     canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
     playChannel(movement);
-
     lastGestureTime = now;
   }
 
   gestureStartY = e.clientY;
+});
+
+// --- Detectar flechas (Samsung TV: simular 16 unidades por pulsación)
+document.addEventListener("keydown",(e)=>{
+  let movement = 0;
+  if(e.key === "ArrowUp") movement = -1;
+  else if(e.key === "ArrowDown") movement = 1;
+
+  if(movement !== 0){
+    keycodeLabel.textContent = `Tecla presionada: ${e.key}`;
+    canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
+    playChannel(movement*16); // simula 16 unidades por presión
+  }
 });
 </script>
 </body>
