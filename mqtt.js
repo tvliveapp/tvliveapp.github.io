@@ -20,8 +20,9 @@
 
 //add <span id="mqtt-status" style="margin-left:10px;color:red;">●</span>
 let mqttIndi=false;
+ let mqttStatus;
 try{
-        const mqttStatus = document.getElementById('mqtt-status');
+         mqttStatus = document.getElementById('mqtt-status');
         mqttIndi=true;
 } catch (error) {
           console.log("sin indicador")
