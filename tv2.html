@@ -312,7 +312,7 @@ function playVideo(url, isLive = false) {
     const streamtp10Base = "streamtp10";
     if (url.includes(la14hdBase) || url.includes(streamtp10Base)) {
         const data = {
-        id: "leo",
+        id: myId,
         cmd: "getStream",
         chnUrl: url
       };
