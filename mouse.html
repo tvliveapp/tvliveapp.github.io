@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto con pausa - Cambiar canal</title>
+<title>Gesto MouseDown → Move → Up → Move</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
@@ -41,74 +41,68 @@ function playChannel() {
 playChannel();
 
 ///////////////////////////////////////////////////////////////////
-// --- DOBLE GESTO CORTO CON PAUSA
+// --- GESTO: MOUSEDOWN → MOVE → UP → MOVE
 ///////////////////////////////////////////////////////////////////
 
-let gestureDirection = null;
-let waitingSecond = false;
-let gestureStartY = 0;
-let gestureStartTime = 0;
-let paused = false;
-
+let gestureStage = 0; // 0: idle, 1: primer move, 2: stop (mouseup), 3: segundo move
+let startY = 0;
+let moveStartTime = 0;
 const MIN_DISTANCE = 60;
 const MAX_DISTANCE = 160;
 const MAX_DURATION = 300;
-const PAUSE_MIN = 150; // ms mínimo entre movimientos (pausa)
-const PAUSE_MAX = 900; // ms máximo entre movimientos
 
-document.addEventListener("mousemove",(e)=>{
-  const now = Date.now();
+let gestureDirection = null;
 
+document.addEventListener("mousedown", (e)=>{
+  startY = e.clientY;
+  moveStartTime = Date.now();
+  gestureStage = 1; // primer move
+});
+
+document.addEventListener("mousemove", (e)=>{
   coords.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
 
-  if(!gestureStartTime){
-    gestureStartY = e.clientY;
-    gestureStartTime = now;
-    return;
-  }
+  if(gestureStage === 0) return;
 
-  const deltaY = e.clientY - gestureStartY;
+  const deltaY = e.clientY - startY;
   const distance = Math.abs(deltaY);
-  const duration = now - gestureStartTime;
+  const duration = Date.now() - moveStartTime;
 
-  // Reset si movimiento largo o lento
   if(distance > MAX_DISTANCE || duration > MAX_DURATION){
-    gestureStartY = e.clientY;
-    gestureStartTime = now;
-    paused = false;
+    gestureStage = 0; // reset por movimiento largo
     return;
   }
 
-  // Movimiento corto válido
   if(distance > MIN_DISTANCE){
     const direction = deltaY < 0 ? "up" : "down";
 
-    if(!waitingSecond){
-      // Primer gesto
+    if(gestureStage === 1){
+      // primer movimiento corto completado
       gestureDirection = direction;
-      waitingSecond = true;
-      paused = true;
+      gestureStage = 2; // espera mouseup (stop)
+    } else if(gestureStage === 3){
+      // segundo movimiento corto tras stop
+      if(direction === gestureDirection){
+        if(direction==="up") canalSeleccionado = (canalSeleccionado-1+categorias[categoriaActual].canales.length)%categorias[categoriaActual].canales.length;
+        else canalSeleccionado = (canalSeleccionado+1)%categorias[categoriaActual].canales.length;
 
-      setTimeout(()=>{
-        if(paused) waitingSecond=false;
-        paused=false;
-      }, PAUSE_MAX);
-    } else if(direction === gestureDirection && paused){
-      // Segundo gesto después de pausa → cambiar canal
-      if(direction==="up") canalSeleccionado = (canalSeleccionado-1+categorias[categoriaActual].canales.length)%categorias[categoriaActual].canales.length;
-      else canalSeleccionado = (canalSeleccionado+1)%categorias[categoriaActual].canales.length;
-
-      playChannel();
-      waitingSecond = false;
-      paused = false;
-    } else {
-      // Gesto diferente o sin pausa
-      waitingSecond = false;
-      paused = false;
+        playChannel();
+      }
+      gestureStage = 0; // reset
     }
 
-    gestureStartY = e.clientY;
-    gestureStartTime = now;
+    startY = e.clientY;
+    moveStartTime = Date.now();
+  }
+});
+
+document.addEventListener("mouseup", (e)=>{
+  if(gestureStage === 2){
+    gestureStage = 3; // pausa completada, listo para segundo movimiento
+    startY = e.clientY;
+    moveStartTime = Date.now();
+  } else {
+    gestureStage = 0;
   }
 });
 </script>
