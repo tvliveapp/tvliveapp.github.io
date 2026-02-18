@@ -3,108 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto Flechas TV con Código</title>
+<title>Flechas TV Simple</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
-  .info { position:fixed; bottom:20px; left:20px; background:rgba(0,0,0,0.6); padding:10px 15px; border-radius:8px; font-size:1.1em; }
-  .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
-  .sequence { position:fixed; top:60px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
-  .keycode { position:fixed; top:100px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
+  .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1.2em; }
+  .keycode { position:fixed; top:60px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1.2em; }
 </style>
 </head>
 <body>
 
-<div class="info" id="info">Canal: 1</div>
-<div class="coords" id="coords">Sim Y: 0</div>
-<div class="sequence" id="sequence">Secuencia: idle</div>
+<div class="coords" id="coords">Y: 0</div>
 <div class="keycode" id="keycode">Última tecla: -</div>
 
 <script>
-// --- Canales de prueba
-const categorias = [{nombre:"Todos", canales:[
-  {nombre:"Canal 1"},
-  {nombre:"Canal 2"},
-  {nombre:"Canal 3"}
-]}];
-
-let canalSeleccionado = 0;
-const info = document.getElementById("info");
-const coords = document.getElementById("coords");
-const sequenceLabel = document.getElementById("sequence");
-const keyCodeLabel = document.getElementById("keycode");
-
-// --- Variables de gesto
-let gestureStage = 0; // 0: idle, 1: primer move, 2: pausa, 3: segundo move
-let accumulated = 0;
+let yCoord = 0;
 const MOVE_UNIT = 16; // cada flecha incrementa 16 unidades
-const MIN_MOVE = 16;  // mínimo para considerar "corto"
-const MAX_MOVE = 32;  // máximo para considerar "corto"
-let gestureDirection = null;
-let pauseTimer = null;
+const coordsLabel = document.getElementById("coords");
+const keyLabel = document.getElementById("keycode");
 
-function updateSequenceLabel() {
-  const stages = ["idle","primer move","pausa","segundo move"];
-  sequenceLabel.textContent = "Secuencia: " + stages[gestureStage];
-}
-
-function playChannel() {
-  info.textContent = "Canal: " + (canalSeleccionado + 1);
-}
-
-// --- Manejo de flechas (simula el movimiento)
 document.addEventListener("keydown", (e)=>{
-  // Mostrar código de la tecla
-  keyCodeLabel.textContent = `Última tecla: ${e.key} (${e.keyCode})`;
+  // Mostrar tecla presionada
+  keyLabel.textContent = `Última tecla: ${e.key} (${e.keyCode})`;
 
-  if(e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-
-  const delta = e.key === "ArrowUp" ? -MOVE_UNIT : MOVE_UNIT;
-  coords.textContent = `Sim Y: ${delta}`;
-
-  // Acumular movimiento
-  accumulated += delta;
-
-  // Detectar primer movimiento corto
-  if(gestureStage === 0 && Math.abs(accumulated) >= MIN_MOVE && Math.abs(accumulated) <= MAX_MOVE){
-    gestureStage = 1;
-    gestureDirection = delta < 0 ? "up" : "down";
-    updateSequenceLabel();
-
-    // Espera pausa (si no llega otra flecha rápido, reset)
-    clearTimeout(pauseTimer);
-    pauseTimer = setTimeout(()=>{
-      gestureStage = 0;
-      accumulated = 0;
-      updateSequenceLabel();
-    }, 500); // 500ms pausa máxima
+  // Incrementar/decrementar solo si flecha arriba/abajo
+  if(e.key === "ArrowUp"){
+    yCoord -= MOVE_UNIT;
+  } else if(e.key === "ArrowDown"){
+    yCoord += MOVE_UNIT;
+  } else {
+    return;
   }
-  // Si primer movimiento ya detectado, pasar a pausa
-  else if(gestureStage===1){
-    gestureStage=2;
-    updateSequenceLabel();
-    accumulated = 0;
 
-    // reinicia timer para reset si no llega segundo movimiento
-    clearTimeout(pauseTimer);
-    pauseTimer = setTimeout(()=>{
-      gestureStage = 0;
-      updateSequenceLabel();
-    }, 500);
-  }
-  // Si ya hubo pausa y llega segundo movimiento corto
-  else if(gestureStage === 2 && Math.abs(accumulated) >= MIN_MOVE && Math.abs(accumulated) <= MAX_MOVE){
-    if((delta < 0 ? "up" : "down") === gestureDirection){
-      // Cambiar canal
-      if(gestureDirection==="up") canalSeleccionado = (canalSeleccionado-1+categorias[0].canales.length)%categorias[0].canales.length;
-      else canalSeleccionado = (canalSeleccionado+1)%categorias[0].canales.length;
-
-      playChannel();
-    }
-    gestureStage = 0;
-    accumulated = 0;
-    updateSequenceLabel();
-  }
+  // Mostrar coordenada acumulada
+  coordsLabel.textContent = `Y: ${yCoord}`;
 });
 </script>
+
 </body>
 </html>
