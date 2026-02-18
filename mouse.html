@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gesto doble con pausa seguro</title>
+<title>Gesto corto con pausa</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
@@ -43,15 +43,13 @@ function playChannel(movement = 0) {
 }
 playChannel(0);
 
-// --- Gestos cortos consecutivos
-const MAX_INCREMENT = 35;      // incremento máximo permitido para detectar
-const MIN_INCREMENT = 10;      // incremento mínimo para contar como gesto
-const MAX_INTERVAL = 1000;     // intervalo máximo entre dos gestos en ms
+// --- Configuración del gesto corto con pausa
+const MAX_DISTANCE = 20;  // máximo movimiento válido
+const PAUSE_MIN = 500;    // ms mínimo de pausa
+const PAUSE_MAX = 1000;   // ms máximo de pausa
 
-let lastGestureDirection = null;  
-let lastGestureTime = null;      
-let gestureStartY = null;        
-let gestureStartTime = null;     
+let lastGestureTime = 0;
+let gestureStartY = null;
 
 document.addEventListener("mousemove", (e)=>{
   const now = Date.now();
@@ -59,50 +57,32 @@ document.addEventListener("mousemove", (e)=>{
 
   if(gestureStartY === null){
     gestureStartY = e.clientY;
-    gestureStartTime = now;
     incrementLabel.textContent = `Incremento actual: 0`;
     return;
   }
 
   const deltaY = e.clientY - gestureStartY;
   const absDeltaY = Math.abs(deltaY);
-  const duration = now - gestureStartTime;
+  incrementLabel.textContent = `Incremento actual: ${deltaY.toFixed(0)}`;
 
-  // Reset si el movimiento es largo o lento → NO cambiar canal
-  if(absDeltaY > MAX_INCREMENT || duration > MAX_INTERVAL){
+  // Ignorar movimientos grandes
+  if(absDeltaY > MAX_DISTANCE){
     gestureStartY = e.clientY;
-    gestureStartTime = now;
-    incrementLabel.textContent = `Incremento actual: 0`;
-    lastGestureDirection = null;
-    lastGestureTime = null;
-    channelLabel.textContent = `Movimiento canal: 0`;
     return;
   }
 
-  // Mostrar incremento solo si es suficiente
-  if(absDeltaY >= MIN_INCREMENT){
-    incrementLabel.textContent = `Incremento actual: ${deltaY.toFixed(0)}`;
-    const direction = deltaY < 0 ? "up" : "down";
+  const pause = now - lastGestureTime;
 
-    if(lastGestureDirection === direction && lastGestureTime && (now - lastGestureTime <= MAX_INTERVAL)){
-      // Segundo gesto dentro del tiempo → cambiar canal
-      const movement = direction === "up" ? -1 : 1;
-      canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
-      playChannel(movement);
+  if(pause >= PAUSE_MIN && pause <= PAUSE_MAX){
+    // Movimiento válido → cambiar canal
+    const movement = deltaY < 0 ? -1 : 1;
+    canalSeleccionado = (canalSeleccionado + movement + categorias[0].canales.length) % categorias[0].canales.length;
+    playChannel(movement);
 
-      // Reset para detectar el siguiente gesto
-      lastGestureDirection = null;
-      lastGestureTime = null;
-    } else {
-      // Primer gesto detectado
-      lastGestureDirection = direction;
-      lastGestureTime = now;
-      channelLabel.textContent = `Movimiento canal: ${direction==="up"? "-":"+"}`;
-    }
+    lastGestureTime = now; // reinicia pausa
   }
 
-  gestureStartY = e.clientY;
-  gestureStartTime = now;
+  gestureStartY = e.clientY; // reinicia el punto de inicio para el siguiente gesto
 });
 </script>
 </body>
