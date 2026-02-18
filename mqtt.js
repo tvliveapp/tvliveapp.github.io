@@ -120,7 +120,7 @@ var websocketclient = {
         websocketclient.connected = true;
     //    document.getElementById('connection-status').innerText = 'Connected';
         console.log("connected");
-        //websocketclient.subscribe("server11",0,"");
+        websocketclient.subscribe(myId,0,"");
         setMqttConnected();
         
     },
