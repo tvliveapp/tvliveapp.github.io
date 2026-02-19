@@ -1,131 +1,151 @@
 // gesture-tv.js
 export class GestureController {
-  constructor(config = {}) {
-    // --- Configurable parameters
-    this.maxIncrement = config.maxIncrement || 20; // px máximo para movimiento corto
-    this.minInterval = config.minInterval || 750;  // ms mínimo entre primer y segundo
-    this.maxInterval = config.maxInterval || 1500; // ms máximo entre primer y segundo
-    this.resetDelay = config.resetDelay || 3000;   // ms bloqueo después de acción
+  constructor({
+    maxIncrement = 20,
+    minInterval = 750,
+    maxInterval = 1500,
+    resetDelay = 3000,
+    indicator,
+    timerLabel,
+    onKey = ()=>{},
+    colorTransition = true
+  } = {}) {
+    this.maxIncrement = maxIncrement;
+    this.minInterval = minInterval;
+    this.maxInterval = maxInterval;
+    this.resetDelay = resetDelay;
+    this.indicator = indicator; // un solo indicador
+    this.timerLabel = timerLabel;
+    this.onKey = onKey;
+    this.colorTransition = colorTransition;
 
-    // --- Internal state
-    this.gestureStart = null;
-    this.firstMoveTime = null;
-    this.firstMoveDelta = 0;
+    this.reset();
+    this.attachMouse();
+    this.updateTimerUI();
+  }
+
+  reset() {
+    this.startY = null;
+    this.startX = null;
+    this.startTime = null;
+    this.firstDirection = null;
     this.waitingSecond = false;
-    this.gestureLocked = false;
+    this.timer = null;
+    this.indicator.textContent = '';
+    this.indicator.style.background = 'gray';
+    this.indicator.style.opacity = 1;
+  }
 
-    // --- Callback for "key press"
-    this.onKey = config.onKey || ((key) => { console.log("Key simulated:", key); });
-
-    // --- Optional visual elements
-    this.indicator = config.indicator || null;
-    this.timerLabel = config.timerLabel || null;
-
-    this.timerInterval = null;
-    this.visualInterval = null;
-
-    // --- Bind event
-    document.addEventListener("mousemove", this.handleMove.bind(this));
+  attachMouse() {
+    document.addEventListener("mousemove", e => this.handleMove(e));
   }
 
   handleMove(e) {
-    if (this.gestureLocked) return;
+    if(this.startX === null) this.startX = e.clientX;
+    if(this.startY === null) this.startY = e.clientY;
 
-    if (!this.gestureStart) {
-      this.gestureStart = { x: e.clientX, y: e.clientY };
-      return;
-    }
-
-    const dx = e.clientX - this.gestureStart.x;
-    const dy = e.clientY - this.gestureStart.y;
-
-    const absX = Math.abs(dx);
-    const absY = Math.abs(dy);
-
-    // Detect horizontal or vertical dominant
-    let delta, direction, axis;
-    if (absY > absX) {
-      delta = dy; axis = "vertical"; 
-      direction = dy < 0 ? "up" : "down";
-    } else {
-      delta = dx; axis = "horizontal";
-      direction = dx < 0 ? "left" : "right";
-    }
-
-    // Update start for next move
-    this.gestureStart = { x: e.clientX, y: e.clientY };
-
-    // Ignore long movements
-    if (Math.abs(delta) > this.maxIncrement) {
-      this.resetGesture();
-      return;
-    }
-
+    const deltaX = e.clientX - this.startX;
+    const deltaY = e.clientY - this.startY;
     const now = Date.now();
 
-    if (!this.waitingSecond) {
-      // primer movimiento válido
-      this.firstMoveTime = now;
-      this.firstMoveDelta = delta;
-      this.waitingSecond = true;
-      if (this.indicator) {
-        this.indicator.style.background = "orange";
-        this.indicator.style.opacity = 1;
-      }
+    let direction = null;
+    let distance = 0;
 
-      if (this.timerLabel) {
-        const start = now;
-        this.timerInterval = setInterval(()=>{
-          this.timerLabel.textContent = `Tiempo desde primer gesto: ${((Date.now()-start)/1000).toFixed(1)}s`;
-        },100);
-      }
-
-      // Visual transition naranja → verde → desvanecer
-      if (this.indicator) {
-        this.visualInterval = setInterval(()=>{
-          const elapsed = Date.now() - this.firstMoveTime;
-          if (elapsed >= this.minInterval && elapsed <= this.maxInterval){
-            this.indicator.style.background = "green";
-            const opacity = 1 - (elapsed - this.minInterval)/(this.maxInterval - this.minInterval);
-            this.indicator.style.opacity = opacity;
-          } else if (elapsed > this.maxInterval) {
-            this.resetGesture();
-          }
-        },50);
-      }
-
+    if(Math.abs(deltaX) > Math.abs(deltaY)) {
+      distance = Math.abs(deltaX);
+      direction = deltaX > 0 ? 'right' : 'left';
     } else {
-      // Segundo movimiento: validar tiempo y dirección
-      const elapsed = now - this.firstMoveTime;
-      if (elapsed >= this.minInterval && elapsed <= this.maxInterval && Math.sign(delta) === Math.sign(this.firstMoveDelta)){
-        // movimiento válido → disparar "tecla"
-        let keyMap = {up:"ArrowUp", down:"ArrowDown", left:"ArrowLeft", right:"ArrowRight"};
-        const key = keyMap[direction] || null;
-        if(key) this.onKey(key);
+      distance = Math.abs(deltaY);
+      direction = deltaY > 0 ? 'down' : 'up';
+    }
 
-        if(this.indicator){
-          this.indicator.style.background = "green";
-          this.indicator.style.opacity = 1;
+    // Descartar movimientos grandes
+    if(distance > this.maxIncrement) {
+      this.startX = e.clientX;
+      this.startY = e.clientY;
+      this.startTime = now;
+      return;
+    }
+
+    if(!this.firstDirection) {
+      // Primer movimiento válido
+      this.firstDirection = direction;
+      this.waitingSecond = true;
+      this.startTime = now;
+      this.startX = e.clientX;
+      this.startY = e.clientY;
+      this.indicator.textContent = this.getArrowIcon(direction);
+      this.setIndicatorColor('orange');
+      this.startTimer();
+
+      return;
+    }
+
+    if(this.waitingSecond) {
+      // Validar segundo movimiento
+      const elapsed = now - this.startTime;
+
+      // Intervalo válido
+      if(elapsed >= this.minInterval && elapsed <= this.maxInterval) {
+        // Dirección debe coincidir
+        if(direction === this.firstDirection) {
+          this.setIndicatorColor('green');
+          this.onKey(this.getArrowKey(direction));
+          // Reiniciar tras delay
+          setTimeout(()=>this.reset(), this.resetDelay);
+        } else {
+          // Direcciones mezcladas → anular
+          this.reset();
         }
-
-        // bloquear gestos
-        this.gestureLocked = true;
-        setTimeout(()=>{
-          this.gestureLocked = false;
-          this.resetGesture();
-        }, this.resetDelay);
-      } else if(elapsed > this.maxInterval){
-        this.resetGesture();
+      } else if(elapsed > this.maxInterval) {
+        // Timeout → reiniciar
+        this.reset();
       }
+    }
+
+    this.startX = e.clientX;
+    this.startY = e.clientY;
+  }
+
+  startTimer() {
+    if(!this.timerLabel) return;
+    let startTime = Date.now();
+    this.timerInterval = setInterval(()=>{
+      let elapsed = ((Date.now() - startTime)/1000).toFixed(1);
+      this.timerLabel.textContent = `Tiempo: ${elapsed}s`;
+
+      // Gradualmente desvanecer indicador
+      if(this.colorTransition && this.waitingSecond){
+        const percent = Math.min((Date.now() - this.startTime)/this.maxInterval,1);
+        const r = 255;
+        const g = Math.floor(165 + (255-165)*(percent)); // de naranja a verde
+        const b = 0;
+        this.indicator.style.background = `rgb(${r},${g},${b})`;
+      }
+    },100);
+  }
+
+  setIndicatorColor(color) {
+    if(this.indicator) this.indicator.style.background = color;
+  }
+
+  getArrowIcon(dir) {
+    switch(dir){
+      case 'up': return '↑';
+      case 'down': return '↓';
+      case 'left': return '←';
+      case 'right': return '→';
+      default: return '';
     }
   }
 
-  resetGesture() {
-    this.waitingSecond = false;
-    this.firstMoveTime = null;
-    this.firstMoveDelta = 0;
-    if (this.indicator) { this.indicator.style.background = "gray"; this.indicator.style.opacity = 1; }
-    if (this.timerLabel) { clearInterval(this.timerInterval); this.timerInterval = null; this.timerLabel.textContent="Tiempo desde primer gesto: 0s"; }
-    if (this.visualInterval) { clearInterval(this.visualInterval); this.visualInterval = null; }
+  getArrowKey(dir) {
+    switch(dir){
+      case 'up': return 'ArrowUp';
+      case 'down': return 'ArrowDown';
+      case 'left': return 'ArrowLeft';
+      case 'right': return 'ArrowRight';
+      default: return '';
+    }
   }
 }
