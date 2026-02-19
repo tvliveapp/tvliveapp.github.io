@@ -3,8 +3,8 @@ export class GestureController {
   constructor(config = {}) {
     // --- Configurable parameters
     this.maxIncrement = config.maxIncrement || 20; // px máximo para movimiento corto
-    this.minInterval = config.minInterval || 500;  // ms mínimo entre primer y segundo
-    this.maxInterval = config.maxInterval || 1000; // ms máximo entre primer y segundo
+    this.minInterval = config.minInterval || 750;  // ms mínimo entre primer y segundo
+    this.maxInterval = config.maxInterval || 1500; // ms máximo entre primer y segundo
     this.resetDelay = config.resetDelay || 3000;   // ms bloqueo después de acción
 
     // --- Internal state
