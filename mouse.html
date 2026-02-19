@@ -3,25 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prueba Gesture TV - Indicadores Graduales</title>
+<title>Prueba Gesture TV</title>
 <style>
-  body { margin:0; background:black; color:white; font-family:Arial,sans-serif; overflow:hidden;}
+  body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
-
-  /* Info canal */
-  .info { position:fixed; bottom:20px; left:20px; background:rgba(0,0,0,0.6); padding:10px 15px; border-radius:8px; font-size:1.2em; }
-
-  /* Coordenadas */
-  .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
-
-  /* Indicadores visuales */
-  .indicator { position:fixed; width:50px; height:50px; border-radius:50%; opacity:1; transition:background 0.1s; }
-  #indicator-vertical { top:20px; right:20px; background:gray; }
-  #indicator-horizontal { top:80px; right:20px; background:gray; }
-
-  /* Temporizador y tecla */
-  .timer { position:fixed; top:140px; right:20px; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:6px; font-size:1em; }
-  .key { position:fixed; top:180px; right:20px; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:6px; font-size:1em; }
+  .indicator {
+    position:fixed; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    font-size:4em; padding:20px 30px;
+    background:gray; border-radius:15px; text-align:center;
+    transition: background 0.3s, opacity 0.3s;
+    z-index:10;
+  }
+  .timer, .keyLabel, .log {
+    position:fixed; left:20px; padding:5px 10px; background:rgba(0,0,0,0.6); border-radius:6px; font-size:1em;
+  }
+  .timer { top:20px; }
+  .keyLabel { top:60px; }
+  .log { bottom:20px; left:20px; max-height:150px; overflow:auto; width:250px; }
 </style>
 </head>
 <body>
@@ -30,69 +29,65 @@
   <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
 </video>
 
-<div class="info" id="info">Canal: 1</div>
-<div class="coords" id="coords">X: 0, Y: 0</div>
-<div class="indicator" id="indicator-vertical"></div>
-<div class="indicator" id="indicator-horizontal"></div>
-<div class="timer" id="timer">Tiempo: 0s</div>
-<div class="key" id="key">Tecla: Ninguna</div>
+<div class="indicator" id="indicator">↑</div>
+<div class="timer" id="timer">Tiempo: 0.0s</div>
+<div class="keyLabel" id="keyLabel">Tecla: -</div>
+<div class="log" id="log">Log:</div>
 
 <script type="module">
-import { GestureController } from "./gesture-tv.js";
+import { GestureController } from './gesture-tv.js';
 
-// --- Canales de prueba
-const categorias = [{nombre:"Todos", canales:[
-  {nombre:"Canal 1", video:"https://www.w3schools.com/html/mov_bbb.mp4"},
-  {nombre:"Canal 2", video:"https://www.w3schools.com/html/movie.mp4"},
-  {nombre:"Canal 3", video:"https://www.w3schools.com/html/mov_bbb.mp4"}
-]}];
+const video = document.getElementById('tv-video');
+const indicator = document.getElementById('indicator');
+const timerLabel = document.getElementById('timer');
+const keyLabel = document.getElementById('keyLabel');
+const log = document.getElementById('log');
 
-let categoriaActual=0, canalSeleccionado=0;
-const video=document.getElementById("tv-video");
-const info=document.getElementById("info");
-const coords=document.getElementById("coords");
+const channels = [
+  "https://www.w3schools.com/html/mov_bbb.mp4",
+  "https://www.w3schools.com/html/movie.mp4",
+  "https://www.w3schools.com/html/mov_bbb.mp4"
+];
 
-function playChannel() {
-  video.src = categorias[categoriaActual].canales[canalSeleccionado].video;
+let currentChannel = 0;
+
+function playChannel(index) {
+  video.src = channels[index];
   video.play();
-  info.textContent = "Canal: " + (canalSeleccionado + 1);
+  logMessage(`Canal cambiado a: ${index + 1}`);
 }
-playChannel();
 
-// Actualizar coordenadas del cursor
-document.addEventListener("mousemove", e => {
-  coords.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
-});
+function logMessage(msg) {
+  log.textContent += "\n" + msg;
+  log.scrollTop = log.scrollHeight;
+}
 
-// Indicadores y temporizador
-const indicatorVertical = document.getElementById("indicator-vertical");
-const indicatorHorizontal = document.getElementById("indicator-horizontal");
-const timerLabel = document.getElementById("timer");
-const keyLabel = document.getElementById("key");
+// Inicial canal
+playChannel(currentChannel);
 
-// Inicializar GestureController
+// Crear controlador de gestos
 const gesture = new GestureController({
+  indicator,
+  timerLabel,
   maxIncrement: 20,
   minInterval: 500,
   maxInterval: 1000,
   resetDelay: 3000,
-  indicator: {vertical: indicatorVertical, horizontal: indicatorHorizontal},
-  timerLabel,
-  onKey: (key)=>{
+  colorTransition: true,
+  onKey: (key) => {
     keyLabel.textContent = "Tecla: " + key;
-
-    // Disparar acción vertical (cambio de canal)
-    if(key === "ArrowUp") canalSeleccionado = (canalSeleccionado-1+categorias[categoriaActual].canales.length)%categorias[categoriaActual].canales.length;
-    if(key === "ArrowDown") canalSeleccionado = (canalSeleccionado+1)%categorias[categoriaActual].canales.length;
-
-    // Disparar acción horizontal
-    if(key === "ArrowLeft") console.log("Movimiento horizontal izquierda detectado");
-    if(key === "ArrowRight") console.log("Movimiento horizontal derecha detectado");
-
-    playChannel();
-  },
-  colorTransition: true // nueva opción para gradualmente cambiar de naranja a verde
+    if(key === 'ArrowUp') {
+      currentChannel = (currentChannel - 1 + channels.length) % channels.length;
+      playChannel(currentChannel);
+    } else if(key === 'ArrowDown') {
+      currentChannel = (currentChannel + 1) % channels.length;
+      playChannel(currentChannel);
+    } else {
+      logMessage(`Movimiento horizontal detectado: ${key}`);
+    }
+  }
 });
 </script>
+
 </body>
 </html>
