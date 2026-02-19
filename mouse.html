@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prueba Gesture TV</title>
+<title>Prueba Gesture TV - Indicadores</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; overflow:hidden;}
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
@@ -14,11 +14,14 @@
   /* Coordenadas */
   .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
 
-  /* Indicador visual de gesto */
-  .indicator { position:fixed; top:20px; right:20px; width:50px; height:50px; background:gray; border-radius:50%; opacity:1; transition:opacity 0.1s, background 0.1s; }
+  /* Indicadores visuales */
+  .indicator { position:fixed; width:50px; height:50px; border-radius:50%; opacity:1; transition:opacity 0.1s, background 0.1s; }
+  #indicator-vertical { top:20px; right:20px; background:gray; }
+  #indicator-horizontal { top:80px; right:20px; background:gray; }
 
-  /* Temporizador */
-  .timer { position:fixed; top:80px; right:20px; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:6px; font-size:1em; }
+  /* Temporizador y tecla */
+  .timer { position:fixed; top:140px; right:20px; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:6px; font-size:1em; }
+  .key { position:fixed; top:180px; right:20px; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:6px; font-size:1em; }
 </style>
 </head>
 <body>
@@ -29,8 +32,10 @@
 
 <div class="info" id="info">Canal: 1</div>
 <div class="coords" id="coords">X: 0, Y: 0</div>
-<div class="indicator" id="indicator"></div>
-<div class="timer" id="timer">Tiempo desde primer gesto: 0s</div>
+<div class="indicator" id="indicator-vertical"></div>
+<div class="indicator" id="indicator-horizontal"></div>
+<div class="timer" id="timer">Tiempo: 0s</div>
+<div class="key" id="key">Tecla: Ninguna</div>
 
 <script type="module">
 import { GestureController } from "./gesture-tv.js";
@@ -54,28 +59,36 @@ function playChannel() {
 }
 playChannel();
 
-// --- Actualizar coordenadas del mouse
+// Actualizar coordenadas del cursor
 document.addEventListener("mousemove", e => {
   coords.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
 });
 
-// --- Inicializar GestureController
-const indicator = document.getElementById("indicator");
+// Indicadores y temporizador
+const indicatorVertical = document.getElementById("indicator-vertical");
+const indicatorHorizontal = document.getElementById("indicator-horizontal");
 const timerLabel = document.getElementById("timer");
+const keyLabel = document.getElementById("key");
 
+// Inicializar GestureController
 const gesture = new GestureController({
   maxIncrement: 20,
   minInterval: 500,
   maxInterval: 1000,
   resetDelay: 3000,
-  indicator,
+  indicator: {vertical: indicatorVertical, horizontal: indicatorHorizontal},
   timerLabel,
   onKey: (key)=>{
-    // Disparar cambio de canal
+    keyLabel.textContent = "Tecla: " + key;
+
+    // Disparar acción vertical (cambio de canal)
     if(key === "ArrowUp") canalSeleccionado = (canalSeleccionado-1+categorias[categoriaActual].canales.length)%categorias[categoriaActual].canales.length;
     if(key === "ArrowDown") canalSeleccionado = (canalSeleccionado+1)%categorias[categoriaActual].canales.length;
-    if(key === "ArrowLeft") console.log("Movimiento horizontal izquierda");
-    if(key === "ArrowRight") console.log("Movimiento horizontal derecha");
+
+    // Disparar acción horizontal
+    if(key === "ArrowLeft") console.log("Movimiento horizontal izquierda detectado");
+    if(key === "ArrowRight") console.log("Movimiento horizontal derecha detectado");
+
     playChannel();
   }
 });
