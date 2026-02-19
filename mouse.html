@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prueba Gesture TV - Indicadores</title>
+<title>Prueba Gesture TV - Indicadores Graduales</title>
 <style>
   body { margin:0; background:black; color:white; font-family:Arial,sans-serif; overflow:hidden;}
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
@@ -15,7 +15,7 @@
   .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
 
   /* Indicadores visuales */
-  .indicator { position:fixed; width:50px; height:50px; border-radius:50%; opacity:1; transition:opacity 0.1s, background 0.1s; }
+  .indicator { position:fixed; width:50px; height:50px; border-radius:50%; opacity:1; transition:background 0.1s; }
   #indicator-vertical { top:20px; right:20px; background:gray; }
   #indicator-horizontal { top:80px; right:20px; background:gray; }
 
@@ -90,7 +90,8 @@ const gesture = new GestureController({
     if(key === "ArrowRight") console.log("Movimiento horizontal derecha detectado");
 
     playChannel();
-  }
+  },
+  colorTransition: true // nueva opción para gradualmente cambiar de naranja a verde
 });
 </script>
 </body>
