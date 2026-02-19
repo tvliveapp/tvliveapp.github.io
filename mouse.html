@@ -65,13 +65,13 @@ function logMessage(msg) {
 // Inicial canal
 playChannel(currentChannel);
 
-// Crear controlador de gestos
+// Crear controlador de gestos con tiempos configurables
 const gesture = new GestureController({
   indicator,
   timerLabel,
   maxIncrement: 20,
-  minInterval: 500,
-  maxInterval: 1000,
+  minInterval: 750,    // mínimo tiempo entre movimientos
+  maxInterval: 1500,   // máximo tiempo entre movimientos
   resetDelay: 3000,
   colorTransition: true,
   onKey: (key) => {
@@ -87,7 +87,6 @@ const gesture = new GestureController({
     }
   },
   getArrowSymbol: (dir) => {
-    // Mapea dirección a flecha
     switch(dir){
       case 'up': return '↑';
       case 'down': return '↓';
@@ -95,7 +94,9 @@ const gesture = new GestureController({
       case 'right': return '→';
       default: return '•';
     }
-  }
+  },
+  colorFirst: 'orange',  // color primer movimiento
+  colorSecond: 'green'   // color segundo movimiento
 });
 </script>
 
