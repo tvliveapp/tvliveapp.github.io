@@ -3,17 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Control TV Samsung con Gestos Mejorado</title>
+<title>Prueba Gesture TV</title>
 <style>
-  body { margin:0; background:black; color:white; font-family:Arial,sans-serif; }
+  body { margin:0; background:black; color:white; font-family:Arial,sans-serif; overflow:hidden;}
   video { width:100vw; height:100vh; object-fit:cover; display:block; }
-  .label { position:fixed; left:20px; background:rgba(0,0,0,0.6);
-           padding:8px 12px; border-radius:6px; font-size:1em; margin-top:0; }
-  .coords { top:20px; }
-  .increment { top:60px; }
-  .channel-change { top:100px; }
-  .timer { top:140px; }
-  .indicator { top:180px; width:30px; height:30px; border-radius:50%; background:gray; transition: background 0.2s, opacity 0.1s; }
+
+  /* Info canal */
+  .info { position:fixed; bottom:20px; left:20px; background:rgba(0,0,0,0.6); padding:10px 15px; border-radius:8px; font-size:1.2em; }
+
+  /* Coordenadas */
+  .coords { position:fixed; top:20px; left:20px; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; font-size:1em; }
+
+  /* Indicador visual de gesto */
+  .indicator { position:fixed; top:20px; right:20px; width:50px; height:50px; background:gray; border-radius:50%; opacity:1; transition:opacity 0.1s, background 0.1s; }
+
+  /* Temporizador */
+  .timer { position:fixed; top:80px; right:20px; background:rgba(0,0,0,0.6); padding:5px 10px; border-radius:6px; font-size:1em; }
 </style>
 </head>
 <body>
@@ -22,13 +27,14 @@
   <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
 </video>
 
-<div class="label coords" id="coords">Y: 0</div>
-<div class="label increment" id="increment">Incremento actual: 0</div>
-<div class="label channel-change" id="channelChange">Canal actual: 1  Movimiento: 0</div>
-<div class="label timer" id="timer">Tiempo desde primer gesto: 0s</div>
-<div class="label indicator" id="indicator"></div>
+<div class="info" id="info">Canal: 1</div>
+<div class="coords" id="coords">X: 0, Y: 0</div>
+<div class="indicator" id="indicator"></div>
+<div class="timer" id="timer">Tiempo desde primer gesto: 0s</div>
 
-<script>
+<script type="module">
+import { GestureController } from "./gesture-tv.js";
+
 // --- Canales de prueba
 const categorias = [{nombre:"Todos", canales:[
   {nombre:"Canal 1", video:"https://www.w3schools.com/html/mov_bbb.mp4"},
@@ -36,126 +42,43 @@ const categorias = [{nombre:"Todos", canales:[
   {nombre:"Canal 3", video:"https://www.w3schools.com/html/mov_bbb.mp4"}
 ]}];
 
-let canalSeleccionado = 0;
-const video = document.getElementById("tv-video");
-const coords = document.getElementById("coords");
-const incrementLabel = document.getElementById("increment");
-const channelLabel = document.getElementById("channelChange");
-const timerLabel = document.getElementById("timer");
-const indicator = document.getElementById("indicator");
+let categoriaActual=0, canalSeleccionado=0;
+const video=document.getElementById("tv-video");
+const info=document.getElementById("info");
+const coords=document.getElementById("coords");
 
-function playChannel(movement = 0) {
-  video.src = categorias[0].canales[canalSeleccionado].video;
+function playChannel() {
+  video.src = categorias[categoriaActual].canales[canalSeleccionado].video;
   video.play();
-  const movText = movement > 0 ? "+16" : (movement < 0 ? "-16" : "0");
-  channelLabel.textContent = `Canal actual: ${canalSeleccionado + 1}  Movimiento: ${movText}`;
+  info.textContent = "Canal: " + (canalSeleccionado + 1);
 }
+playChannel();
 
-// --- Configuración
-const MAX_INCREMENT = 20;   // px máximo para movimiento corto
-const MIN_INTERVAL = 750;   // ms mínimo entre primer y segundo
-const MAX_INTERVAL = 1500;  // ms máximo entre primer y segundo
-const RESET_DELAY = 3000;   // ms después de realizar acción
-
-let gestureStartY = null;
-let firstMoveTime = null;
-let firstMoveDelta = 0;
-let waitingSecond = false;
-let gestureLocked = false;
-
-let timerStart = null;
-let timerInterval = null;
-let visualInterval = null;
-
-// --- Mousemove
+// --- Actualizar coordenadas del mouse
 document.addEventListener("mousemove", e => {
-  coords.textContent = `Y: ${e.clientY}`;
-
-  if(gestureLocked) return; // espera después de detección
-
-  if(gestureStartY === null){
-    gestureStartY = e.clientY;
-    return;
-  }
-
-  const delta = e.clientY - gestureStartY;
-  incrementLabel.textContent = `Incremento actual: ${delta.toFixed(0)}`;
-  gestureStartY = e.clientY;
-
-  if(Math.abs(delta) > MAX_INCREMENT){
-    // movimiento largo → reiniciar primer gesto
-    resetGesture();
-    return;
-  }
-
-  const now = Date.now();
-
-  if(!waitingSecond){
-    // primer movimiento válido
-    firstMoveTime = now;
-    firstMoveDelta = delta;
-    waitingSecond = true;
-    indicator.style.background = "orange"; // primer movimiento
-    indicator.style.opacity = 1;
-
-    // iniciar temporizador de conteo
-    timerStart = now;
-    if(timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(()=>{
-      const seconds = ((Date.now()-timerStart)/1000).toFixed(1);
-      timerLabel.textContent = `Tiempo desde primer gesto: ${seconds}s`;
-    }, 100);
-
-    // control visual del cambio naranja → verde → desvanecimiento
-    if(visualInterval) clearInterval(visualInterval);
-    visualInterval = setInterval(()=>{
-      const elapsed = Date.now() - firstMoveTime;
-
-      if(elapsed >= MIN_INTERVAL && elapsed <= MAX_INTERVAL){
-        // cambio a verde a partir del tiempo mínimo
-        indicator.style.background = "green";
-        // desvanecer progresivamente
-        const opacity = 1 - (elapsed - MIN_INTERVAL)/(MAX_INTERVAL - MIN_INTERVAL);
-        indicator.style.opacity = opacity;
-      } else if(elapsed > MAX_INTERVAL){
-        resetGesture();
-      }
-    }, 50);
-
-  } else {
-    // segundo movimiento: validar intervalo y misma dirección
-    const elapsed = now - firstMoveTime;
-    if(elapsed >= MIN_INTERVAL && elapsed <= MAX_INTERVAL && Math.sign(delta) === Math.sign(firstMoveDelta)){
-      // gesto válido → cambiar canal +16/-16
-      const movement = delta < 0 ? -16 : 16;
-      canalSeleccionado = (canalSeleccionado + (movement > 0 ? 1 : -1) + categorias[0].canales.length) % categorias[0].canales.length;
-      playChannel(movement);
-
-      indicator.style.background = "green";
-      indicator.style.opacity = 1;
-
-      // bloquear gestos por RESET_DELAY
-      gestureLocked = true;
-      setTimeout(()=>{
-        gestureLocked = false;
-        resetGesture();
-      }, RESET_DELAY);
-
-    } else if(elapsed > MAX_INTERVAL){
-      resetGesture();
-    }
-  }
+  coords.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
 });
 
-function resetGesture(){
-  waitingSecond = false;
-  firstMoveTime = null;
-  firstMoveDelta = 0;
-  indicator.style.background = "gray";
-  indicator.style.opacity = 1;
-  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; timerLabel.textContent="Tiempo desde primer gesto: 0s"; }
-  if(visualInterval){ clearInterval(visualInterval); visualInterval=null; }
-}
+// --- Inicializar GestureController
+const indicator = document.getElementById("indicator");
+const timerLabel = document.getElementById("timer");
+
+const gesture = new GestureController({
+  maxIncrement: 20,
+  minInterval: 500,
+  maxInterval: 1000,
+  resetDelay: 3000,
+  indicator,
+  timerLabel,
+  onKey: (key)=>{
+    // Disparar cambio de canal
+    if(key === "ArrowUp") canalSeleccionado = (canalSeleccionado-1+categorias[categoriaActual].canales.length)%categorias[categoriaActual].canales.length;
+    if(key === "ArrowDown") canalSeleccionado = (canalSeleccionado+1)%categorias[categoriaActual].canales.length;
+    if(key === "ArrowLeft") console.log("Movimiento horizontal izquierda");
+    if(key === "ArrowRight") console.log("Movimiento horizontal derecha");
+    playChannel();
+  }
+});
 </script>
 </body>
 </html>
