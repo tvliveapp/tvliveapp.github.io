@@ -29,7 +29,7 @@
   <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
 </video>
 
-<div class="indicator" id="indicator">↑</div>
+<div class="indicator" id="indicator">•</div>
 <div class="timer" id="timer">Tiempo: 0.0s</div>
 <div class="keyLabel" id="keyLabel">Tecla: -</div>
 <div class="log" id="log">Log:</div>
@@ -84,6 +84,16 @@ const gesture = new GestureController({
       playChannel(currentChannel);
     } else {
       logMessage(`Movimiento horizontal detectado: ${key}`);
+    }
+  },
+  getArrowSymbol: (dir) => {
+    // Mapea dirección a flecha
+    switch(dir){
+      case 'up': return '↑';
+      case 'down': return '↓';
+      case 'left': return '←';
+      case 'right': return '→';
+      default: return '•';
     }
   }
 });
