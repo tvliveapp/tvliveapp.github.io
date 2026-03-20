@@ -479,7 +479,33 @@ function playVideo(url, isLive = false) {
     }
 }*/
 let player="";
-function playVideo(url, isLive = false, k1 = "", k2 = "") {
+
+async function fetchRedirectUrl(url) {
+    try {
+        // Realizar la solicitud con la opción redirect: "manual"
+        const response = await fetch(url);
+
+        // Si la respuesta tiene un código de redirección (por ejemplo 3xx)
+        if (response.status >= 300 && response.status < 400) {
+            const redirectedUrl = response.headers.get("Location");  // Obtener la URL de redirección
+            if (redirectedUrl) {
+                console.log("Redirigido a:", redirectedUrl);
+                return redirectedUrl;  // Retorna la URL de la redirección
+            } else {
+                throw new Error("No se encontró la URL de redirección.");
+            }
+        } else if (response.ok) {
+            // Si no hay redirección, retornamos la URL original
+            return response.url;
+        } else {
+            throw new Error("Error en la solicitud: " + response.status);
+        }
+    } catch (error) {
+        console.error("Error al obtener la URL de redirección:", error);
+        return null;  // En caso de error, devolvemos null
+    }
+}
+async function playVideo(url, isLive = false, k1 = "", k2 = "") {
     if (hls) {
         hls.destroy();
     }
@@ -487,6 +513,53 @@ function playVideo(url, isLive = false, k1 = "", k2 = "") {
       var sources = [];
       if (player)
         player.remove();
+
+
+    // Verificar si la URL es MPD con DRM
+    if (url.includes('.mpd') && k1 && k2) {
+        sources.push({
+            file: url,
+            drm: {
+                "clearkey": {
+                    "keyId": k1,
+                    "key": k2
+                }
+            }
+        });
+    }
+    // Verificar si la URL es M3U
+    else if (url.includes('.m3u')) {
+        sources.push({
+            file: url,
+        });
+    }
+    // Si la URL no es MPD ni M3U, obtener la URL redirigida
+    else {
+        const finalUrl = await fetchRedirectUrl(url); // Espera la redirección
+        if (finalUrl) {
+            sources.push({
+                file: finalUrl,
+            });
+        } else {
+            console.error("No se pudo obtener la URL de redirección.");
+            return; // Si la redirección falla, no se configura el reproductor
+        }
+    }
+
+    // Configuración del reproductor JWPlayer con la URL final (de MPD, M3U o redirigida)
+    player = jwplayer("tv-video").setup({
+        playlist: [{
+            sources: sources
+        }],
+        autostart: true,
+        width: "100%",
+        height: "100%",
+        stretching: "exactfit",
+        aspectratio: "16:9",
+        cast: {},
+        sharing: {}
+    });
+    /*
     // Verificar si el canal es MPD
     // Verificar si el canal es MPD
     if (url.includes('.mpd') && k1 && k2) {
@@ -494,6 +567,13 @@ function playVideo(url, isLive = false, k1 = "", k2 = "") {
             file: url,
             drm: {"clearkey": {"keyId": k1, "key": k2}}
         });
+    }else if(url.includes('.m3u')){
+        sources.push({
+            file: url,
+        });
+    }else{
+        //aqui la redireccion
+    }
         player =jwplayer("tv-video").setup({
         playlist: [{
             sources: sources
@@ -506,7 +586,9 @@ function playVideo(url, isLive = false, k1 = "", k2 = "") {
         cast: {}, 
                 sharing: {}
         });
-    } else if (Hls.isSupported()) {
+    */
+
+    /*} else if (Hls.isSupported()) {
         // Si no es MPD, usamos HLS.js (para canales M3U)
         hls = new Hls();
         hls.on(Hls.Events.ERROR, function(event, data) {
@@ -528,7 +610,7 @@ function playVideo(url, isLive = false, k1 = "", k2 = "") {
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = url;
         video.play();
-    }
+    }*/
 }
 
 ///////////////////////////////////////////////////////////////////
