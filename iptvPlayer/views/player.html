@@ -296,7 +296,7 @@ function integrarCanalesMpd() {
 window.addEventListener('load', function() {
     console.log('Page and all resources fully loaded!');
     let m3uUrl = localStorage.getItem('m3uUrl');
-   //m3uUrl="http://127.0.0.1:8080/listas/unicalista.m3u";
+   m3uUrl="../listas/unicalista.m3u";
     if (m3uUrl) {
         fetchM3U(m3uUrl);
     } else {
