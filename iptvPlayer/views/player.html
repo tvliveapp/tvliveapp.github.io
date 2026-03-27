@@ -10,7 +10,7 @@
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 
 <script type="text/javascript" src="../assets/mqttws31.js"></script>
-  <script type="text/javascript" src="../assets/mqtt.js"></script>
+ 
   <script type="text/javascript" src="../assets/canalesMpd.js"></script>
   <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>jwplayer.key = "XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo";</script>
@@ -232,7 +232,7 @@
 
 <div class="number-overlay" id="number-overlay"></div>
 <div class="info">⬅️➡️ Categoría | ↑↓ Canales | ⏎ Selecciona | ⏎ Regresar | 0–9 Numérico</div>
-
+ <script type="text/javascript" src="../assets/mqtt.js"></script>
 <script>
 ///////////////////////////////////////////////////////////////////
 // ------------------------- SETUP BASICO ------------------------- 
@@ -296,7 +296,7 @@ function integrarCanalesMpd() {
 window.addEventListener('load', function() {
     console.log('Page and all resources fully loaded!');
     let m3uUrl = localStorage.getItem('m3uUrl');
-    m3uUrl="http://127.0.0.1:8080/listas/unicalista.m3u";
+   //m3uUrl="http://127.0.0.1:8080/listas/unicalista.m3u";
     if (m3uUrl) {
         fetchM3U(m3uUrl);
     } else {
@@ -308,6 +308,7 @@ window.addEventListener('load', function() {
     }
 
     async function fetchM3U(url) {
+    try{	
         const response = await fetch(url);
         const m3uText = await response.text();
         const canales = [];
@@ -361,6 +362,34 @@ window.addEventListener('load', function() {
         }
 
         changeChannel();
+    }catch(error){
+
+    		integrarCanalesMpd();
+        const todosCanales = [];
+        categorias.forEach(cat => todosCanales.push(...cat.canales));
+        categorias.unshift({
+            nombre: "Todos",
+            canales: todosCanales,
+        });
+
+        generarTabs();
+        generarLista();
+
+        const ultimoCanal = JSON.parse(localStorage.getItem('ultimoCanal'));
+        if (ultimoCanal) {
+            categoriaActual = ultimoCanal.categoria;
+            canalSeleccionado = ultimoCanal.canal;
+        } else {
+            categoriaActual = 0;
+            canalSeleccionado = 0;
+        }
+		categoriaActual=0;
+
+		canalSeleccionado=226;
+        changeChannel();
+
+    }
+
     }
 });
 
@@ -480,40 +509,20 @@ function playVideo(url, isLive = false) {
 }*/
 let player="";
 
-async function fetchRedirectUrl(url) {
-    try {
-        // Realizar la solicitud con la opción redirect: "manual"
-        const response = await fetch(url);
+ function playVideo(url, isLive = false, k1 = "", k2 = "") {
 
-        // Si la respuesta tiene un código de redirección (por ejemplo 3xx)
-        if (response.status >= 300 && response.status < 400) {
-            const redirectedUrl = response.headers.get("Location");  // Obtener la URL de redirección
-            if (redirectedUrl) {
-                console.log("Redirigido a:", redirectedUrl);
-                return redirectedUrl;  // Retorna la URL de la redirección
-            } else {
-                throw new Error("No se encontró la URL de redirección.");
-            }
-        } else if (response.ok) {
-            // Si no hay redirección, retornamos la URL original
-            return response.url;
-        } else {
-            throw new Error("Error en la solicitud: " + response.status);
-        }
-    } catch (error) {
-        console.error("Error al obtener la URL de redirección:", error);
-        return null;  // En caso de error, devolvemos null
-    }
-}
-async function playVideo(url, isLive = false, k1 = "", k2 = "") {
     if (hls) {
         hls.destroy();
     }
  
+      
       var sources = [];
-      if (player)
-        player.remove();
-
+      try{
+          if (player)
+            player.remove();
+      }catch (error){
+        console.log("no player");
+      }
 
     // Verificar si la URL es MPD con DRM
     if (url.includes('.mpd') && k1 && k2) {
@@ -526,39 +535,66 @@ async function playVideo(url, isLive = false, k1 = "", k2 = "") {
                 }
             }
         });
-    }
-    // Verificar si la URL es M3U
-    else if (url.includes('.m3u')) {
-        sources.push({
-            file: url,
+        // Configuración del reproductor JWPlayer con la URL final (de MPD, M3U o redirigida)
+        player = jwplayer("tv-video").setup({
+            playlist: [{
+                sources: sources
+            }],
+            autostart: true,
+            width: "100%",
+            height: "100%",
+            stretching: "exactfit",
+            aspectratio: "16:9",
+            cast: {},
+            sharing: {},
+             events: {
+            onReady: function() {
+                console.log("JWPlayer está listo.");
+                // Aquí puedes interactuar con el reproductor de manera segura
+                jwplayer().getVolume();  // Por ejemplo, obtener el volumen actual
+            },
+            onError: function(error) {
+                console.log("Error en JWPlayer:", error);
+            }
+        }
         });
     }
+    // Verificar si la URL es M3U
+     
     // Si la URL no es MPD ni M3U, obtener la URL redirigida
     else {
-        const finalUrl = await fetchRedirectUrl(url); // Espera la redirección
-        if (finalUrl) {
-            sources.push({
-                file: finalUrl,
-            });
-        } else {
-            console.error("No se pudo obtener la URL de redirección.");
-            return; // Si la redirección falla, no se configura el reproductor
-        }
-    }
+         // Si no es MPD, usamos HLS.js (para canales M3U)
 
-    // Configuración del reproductor JWPlayer con la URL final (de MPD, M3U o redirigida)
-    player = jwplayer("tv-video").setup({
-        playlist: [{
-            sources: sources
-        }],
-        autostart: true,
-        width: "100%",
-        height: "100%",
-        stretching: "exactfit",
-        aspectratio: "16:9",
-        cast: {},
-        sharing: {}
-    });
+          if (document.location.host.includes('github')){
+                publicar("geturl",url);
+          }else{
+              if (Hls.isSupported()) {
+                hls = new Hls();
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.log("HLS.js error", data);
+                });
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    console.log('Manifiesto analizado correctamente');
+                    video.play();
+                });
+
+                video.addEventListener('canplay', () => {
+                    console.log('El video está listo para reproducir');
+                    video.play();
+                });
+
+                hls.loadSource(url);
+                hls.attachMedia(video);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                video.play();
+            }
+
+        } 
+
+}
+    
     /*
     // Verificar si el canal es MPD
     // Verificar si el canal es MPD
@@ -820,6 +856,17 @@ window.addEventListener('error', function(event) {
               publicar("logLio",`Error de carga de recurso: ${event.target.src || event.target.href}`, 'error'); 
     }
 }, true);
+
+////mqtt message received
+ function  mqttMessage(payloadString){
+    data= JSON.parse(payloadString);
+   if(data.cmd=="playStream"){
+       playVideo(data.streamUrl,true);
+       return;
+   }
+   
+ }
+
 </script>
 </body>
 </html>
