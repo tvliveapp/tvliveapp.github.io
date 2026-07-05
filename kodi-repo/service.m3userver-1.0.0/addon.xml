@@ -8,13 +8,13 @@
                name="IPTV Local">
         <dir>
             <info compressed="false">
-                https://juan123.github.io/repo-kodi/addons.xml
+                https://tvliveapp.github.io/repo-kodi/addons.xml
             </info>
             <checksum>
-                https://juan123.github.io/repo-kodi/addons.xml.md5
+                https://tvliveapp.github.io/repo-kodi/addons.xml.md5
             </checksum>
             <datadir zip="true">
-                https://juan123.github.io/repo-kodi/
+                https://tvliveapp.github.io/repo-kodi/
             </datadir>
         </dir>
     </extension>
