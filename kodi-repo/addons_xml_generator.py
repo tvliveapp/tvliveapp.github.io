@@ -90,9 +90,9 @@ for addon_dir, addon_xml, addon_id, version in addons:
 
                 filename = os.path.join(root, file)
 
-                arcname = os.path.relpath(filename, ROOT)
+                arcname = os.path.relpath(filename, addon_dir)
 
                 z.write(filename, arcname)
 
 print("ZIPs creados correctamente.")
-print("Repositorio listo.")
+print("Repositorio listo.") 
