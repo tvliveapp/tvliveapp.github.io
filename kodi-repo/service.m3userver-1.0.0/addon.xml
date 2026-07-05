@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="repository.iptvlocal"
-       name="Repositorio IPTV Local"
+<addon id="service.m3userver"
+       name="Servidor M3U"
        version="1.0.0"
-       provider-name="IPTV Local">
+       provider-name="TVLiveApp">
 
-    <extension point="xbmc.addon.repository"
-               name="IPTV Local">
-        <dir>
-            <info compressed="false">
-                https://tvliveapp.github.io/repo-kodi/addons.xml
-            </info>
-            <checksum>
-                https://tvliveapp.github.io/repo-kodi/addons.xml.md5
-            </checksum>
-            <datadir zip="true">
-                https://tvliveapp.github.io/repo-kodi/
-            </datadir>
-        </dir>
-    </extension>
+    <requires>
+        <import addon="xbmc.python" version="3.0.0"/>
+    </requires>
+
+    <extension point="xbmc.service"
+               library="main.py"
+               start="startup"/>
 
     <extension point="xbmc.addon.metadata">
-        <summary>Repositorio IPTV Local</summary>
+        <summary>Servidor IPTV local</summary>
         <platform>all</platform>
     </extension>
 

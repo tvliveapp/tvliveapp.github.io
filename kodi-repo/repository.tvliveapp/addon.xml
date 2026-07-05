@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addons>
 <addon id="repository.tvliveapp"
        name="TV Live App Repository"
        version="1.0.0"
@@ -32,23 +31,3 @@
     </extension>
 
 </addon>
-<addon id="service.m3userver"
-       name="Servidor M3U"
-       version="1.0.0"
-       provider-name="TVLiveApp">
-
-    <requires>
-        <import addon="xbmc.python" version="3.0.0"/>
-    </requires>
-
-    <extension point="xbmc.service"
-               library="main.py"
-               start="startup"/>
-
-    <extension point="xbmc.addon.metadata">
-        <summary>Servidor IPTV local</summary>
-        <platform>all</platform>
-    </extension>
-
-</addon>
-</addons>
